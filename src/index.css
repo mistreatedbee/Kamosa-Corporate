@@ -1,0 +1,72 @@
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,400&display=swap');
+
+/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+
+:root {
+  --kamosa-ink: #10231d;
+  --kamosa-green: #176b4b;
+  --kamosa-green-light: #239064;
+  --kamosa-gold: #c8a45a;
+  --kamosa-cream: #f5f3ed;
+  --kamosa-muted: #64706b;
+  --kamosa-hairline: #e3e6e1;
+  --kamosa-section-y: clamp(64px, 8vw, 120px);
+}
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  background-color: #ffffff;
+  color: var(--kamosa-ink);
+  font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+  font-size: 1rem;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+h1,
+h2,
+h3,
+h4 {
+  font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 700;
+}
+::selection {
+  background: var(--kamosa-gold);
+  color: var(--kamosa-ink);
+}
+:where(a, button, input, textarea, select, [tabindex]):focus-visible {
+  outline: 2px solid var(--kamosa-gold);
+  outline-offset: 2px;
+}
+.kamosa-section {
+  padding-top: var(--kamosa-section-y);
+  padding-bottom: var(--kamosa-section-y);
+}
+/* Fallback in case the installed Tailwind version predates the text-wrap utilities. */
+.text-balance {
+  text-wrap: balance;
+}
+img {
+  max-width: 100%;
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
