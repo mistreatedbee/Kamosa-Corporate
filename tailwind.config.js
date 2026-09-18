@@ -4,23 +4,27 @@ export default {
     extend: {
       colors: {
         ink: {
-          DEFAULT: '#10231D',
-          900: '#10231D',
-          800: '#163027',
-          700: '#1B4235',
+          DEFAULT: '#353535',
+          900: '#353535',
+          800: '#4a4a4a',
+          700: '#5c5c5c',
         },
         brand: {
-          DEFAULT: '#176B4B',
-          600: '#176B4B',
-          500: '#239064',
+          DEFAULT: '#E71B1C',
+          600: '#E71B1C',
+          500: '#CD1718',
+        },
+        lime: {
+          DEFAULT: '#8CC540',
+          soft: '#A9D96D',
         },
         gold: {
-          DEFAULT: '#C8A45A',
-          soft: '#DCC48F',
+          DEFAULT: '#8CC540',
+          soft: '#A9D96D',
         },
-        cream: '#F5F3ED',
-        muted: '#64706B',
-        hairline: '#E3E6E1',
+        cream: '#D9D5D4',
+        muted: '#6B6B6B',
+        hairline: '#E8E2E1',
       },
       fontFamily: {
         display: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
@@ -34,10 +38,7 @@ export default {
         eyebrow: ['0.6875rem', { lineHeight: '1', letterSpacing: '0.18em' }],
       },
       maxWidth: {
-        content: [
-  './index.html',
-  './src/**/*.{js,ts,jsx,tsx}'
-],
+        content: '1200px',
         prose: '62ch',
       },
       borderRadius: {

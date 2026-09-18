@@ -9,13 +9,18 @@
 /* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
 
 :root {
-  --kamosa-ink: #10231d;
-  --kamosa-green: #176b4b;
-  --kamosa-green-light: #239064;
-  --kamosa-gold: #c8a45a;
-  --kamosa-cream: #f5f3ed;
-  --kamosa-muted: #64706b;
-  --kamosa-hairline: #e3e6e1;
+  --kamosa-red: #e71b1c;
+  --kamosa-lime: #8cc540;
+  --kamosa-charcoal: #353535;
+  --kamosa-light-grey: #d9d5d4;
+  --kamosa-white: #ffffff;
+  --kamosa-ink: #353535;
+  --kamosa-green: #8cc540;
+  --kamosa-green-light: #a9d96d;
+  --kamosa-gold: #8cc540;
+  --kamosa-cream: #d9d5d4;
+  --kamosa-muted: #6b6b6b;
+  --kamosa-hairline: #e8e2e1;
   --kamosa-section-y: clamp(64px, 8vw, 120px);
 }
 html {
@@ -24,7 +29,7 @@ html {
 }
 body {
   margin: 0;
-  background-color: #ffffff;
+  background-color: var(--kamosa-white);
   color: var(--kamosa-ink);
   font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
   font-size: 1rem;
@@ -40,11 +45,11 @@ h4 {
   font-weight: 700;
 }
 ::selection {
-  background: var(--kamosa-gold);
-  color: var(--kamosa-ink);
+  background: var(--kamosa-lime);
+  color: var(--kamosa-charcoal);
 }
 :where(a, button, input, textarea, select, [tabindex]):focus-visible {
-  outline: 2px solid var(--kamosa-gold);
+  outline: 2px solid var(--kamosa-red);
   outline-offset: 2px;
 }
 .kamosa-section {

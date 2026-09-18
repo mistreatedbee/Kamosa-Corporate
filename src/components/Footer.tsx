@@ -17,10 +17,17 @@ export function Footer() {
       <Container className="py-16 lg:py-20">
         <div className="grid gap-12 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1.3fr_1fr] lg:gap-10">
           <div>
-            <Link to="/" className="flex flex-col leading-none" aria-label="Kamosa (Pty) Ltd — home">
-              <span className="font-display text-xl font-extrabold tracking-tight text-white">KAMOSA</span>
-              <span className="mt-1 font-sans text-[0.625rem] font-medium uppercase tracking-[0.22em] text-gold">
-                (Pty) Ltd
+            <Link to="/" className="flex items-center gap-3 leading-none" aria-label="Kamosa (Pty) Ltd — home">
+              <img
+                src="/logo.jpg"
+                alt="Kamosa logo"
+                className="h-12 w-12 rounded-sm object-cover ring-1 ring-white/10"
+              />
+              <span className="flex flex-col">
+                <span className="font-display text-xl font-extrabold tracking-tight text-white">KAMOSA</span>
+                <span className="mt-1 font-sans text-[0.625rem] font-medium uppercase tracking-[0.22em] text-gold">
+                  (Pty) Ltd
+                </span>
               </span>
             </Link>
             <p className="mt-6 max-w-xs text-[0.9375rem] leading-relaxed text-white/60">

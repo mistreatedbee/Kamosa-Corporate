@@ -13,6 +13,7 @@ import { Contact } from './pages/Contact';
 import { EnvironmentalManagement } from './pages/EnvironmentalManagement';
 import { Privacy } from './pages/Privacy';
 import { Terms } from './pages/Terms';
+import { AdminDashboard } from './pages/AdminDashboard';
 import { NotFound } from './pages/NotFound';
 
 function ScrollToTop() {
@@ -42,6 +43,7 @@ export function App() {
             <Route path="/environmental-management" element={<EnvironmentalManagement />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

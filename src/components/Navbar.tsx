@@ -38,10 +38,17 @@ export function Navbar() {
         }>
         
         <Container className="flex h-[76px] items-center justify-between gap-6">
-          <Link to="/" className="flex shrink-0 flex-col leading-none" aria-label="Kamosa (Pty) Ltd — home">
-            <span className="font-display text-lg font-extrabold tracking-tight text-ink-900">KAMOSA</span>
-            <span className="mt-0.5 font-sans text-[0.625rem] font-medium uppercase tracking-[0.22em] text-muted">
-              (Pty) Ltd
+          <Link to="/" className="flex shrink-0 items-center gap-3 leading-none" aria-label="Kamosa (Pty) Ltd — home">
+            <img
+              src="/logo.jpg"
+              alt="Kamosa logo"
+              className="h-10 w-10 rounded-sm object-cover ring-1 ring-black/5"
+            />
+            <span className="flex flex-col">
+              <span className="font-display text-lg font-extrabold tracking-tight text-ink-900">KAMOSA</span>
+              <span className="mt-0.5 font-sans text-[0.625rem] font-medium uppercase tracking-[0.22em] text-muted">
+                (Pty) Ltd
+              </span>
             </span>
           </Link>
 
