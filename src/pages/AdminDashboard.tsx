@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRightIcon, BriefcaseBusinessIcon, Building2Icon, FileTextIcon, ShieldCheckIcon, UsersIcon } from 'lucide-react';
+import { ArrowUpRightIcon, BriefcaseBusinessIcon, Building2Icon, FileTextIcon, LogOutIcon, ShieldCheckIcon, UsersIcon } from 'lucide-react';
 import { Container } from '../components/Container';
 
 const stats = [
@@ -34,13 +34,22 @@ export function AdminDashboard() {
           </p>
           <h1 className="mt-3 font-display text-display-md text-ink-900">Operations overview</h1>
         </div>
-        <Link
-          to="/contact"
-          className="inline-flex items-center gap-2 self-start rounded-sm bg-brand-600 px-5 py-3 font-display text-sm font-semibold text-white transition-colors duration-200 hover:bg-ink-900"
-        >
-          New enquiry
-          <ArrowUpRightIcon className="h-4 w-4" aria-hidden="true" />
-        </Link>
+        <div className="flex items-center gap-3 self-start">
+          <Link
+            to="/contact"
+            className="inline-flex items-center gap-2 rounded-sm bg-brand-600 px-5 py-3 font-display text-sm font-semibold text-white transition-colors duration-200 hover:bg-ink-900"
+          >
+            New enquiry
+            <ArrowUpRightIcon className="h-4 w-4" aria-hidden="true" />
+          </Link>
+          <Link
+            to="/admin/logout"
+            className="inline-flex items-center gap-2 rounded-sm border border-hairline bg-white px-4 py-3 font-display text-sm font-semibold text-ink-900 transition-colors duration-200 hover:border-brand-600 hover:text-brand-600"
+          >
+            <LogOutIcon className="h-4 w-4" aria-hidden="true" />
+            Logout
+          </Link>
+        </div>
       </div>
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">

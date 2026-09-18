@@ -42,7 +42,7 @@ export function Navbar() {
             <img
               src="/logo.jpg"
               alt="Kamosa logo"
-              className="h-10 w-10 rounded-sm object-cover ring-1 ring-black/5"
+              className="h-14 w-14 rounded-sm object-cover ring-1 ring-black/5"
             />
             <span className="flex flex-col">
               <span className="font-display text-lg font-extrabold tracking-tight text-ink-900">KAMOSA</span>

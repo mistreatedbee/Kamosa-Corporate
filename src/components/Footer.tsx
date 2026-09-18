@@ -21,7 +21,7 @@ export function Footer() {
               <img
                 src="/logo.jpg"
                 alt="Kamosa logo"
-                className="h-12 w-12 rounded-sm object-cover ring-1 ring-white/10"
+                className="h-16 w-16 rounded-sm object-cover ring-1 ring-white/10"
               />
               <span className="flex flex-col">
                 <span className="font-display text-xl font-extrabold tracking-tight text-white">KAMOSA</span>
