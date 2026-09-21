@@ -31,7 +31,8 @@ export function AdminLogin() {
   return (
     <Container as="main" className="flex min-h-screen items-center justify-center py-28">
       <div className="w-full max-w-md rounded-sm border border-hairline bg-white p-8 shadow-card">
-        <div className="mb-6 text-center">
+        <div className="mb-6 flex flex-col items-center text-center">
+          <img src="/logo.jpg" alt="Kamosa logo" className="mb-4 h-16 w-16 rounded-sm object-cover" />
           <p className="font-display text-eyebrow font-semibold uppercase tracking-[0.18em] text-brand-600">Admin access</p>
           <h1 className="mt-3 font-display text-display-md text-ink-900">Login</h1>
         </div>

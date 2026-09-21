@@ -33,7 +33,6 @@ export const navLinks = [
 { label: 'Services', to: '/services' },
 { label: 'Experience', to: '/experience' },
 { label: 'Leadership', to: '/leadership' },
-{ label: 'Admin', to: '/admin' },
 { label: 'Contact', to: '/contact' }];
 
 
