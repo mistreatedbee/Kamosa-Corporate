@@ -1,4 +1,3 @@
-import React from 'react';
 import { Container } from './Container';
 import { Reveal } from './Reveal';
 import { ButtonLink } from './Button';
@@ -24,7 +23,7 @@ export function ExperienceSection({ condensed = false }: ExperienceSectionProps)
             </p>
             <Reveal>
               <h2 id="experience-heading" className="text-display-md text-balance text-ink-900">
-                Experience that understands high-risk environments.
+                A proven track record in high-risk operations.
               </h2>
             </Reveal>
             <Reveal index={1}>

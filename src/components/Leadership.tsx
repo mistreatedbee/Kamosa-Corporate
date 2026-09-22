@@ -1,4 +1,3 @@
-import React from 'react';
 import { UserIcon } from 'lucide-react';
 import { Container } from './Container';
 import { Reveal } from './Reveal';
@@ -35,7 +34,7 @@ export function Leadership({ condensed = false }: LeadershipProps) {
             </p>
             <Reveal>
               <h2 id="leadership-heading" className="text-display-md text-balance text-ink-900">
-                Experienced leadership. Practical industry knowledge.
+                Led by a registered professional with real site experience.
               </h2>
             </Reveal>
 
