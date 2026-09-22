@@ -69,7 +69,7 @@ export function Footer() {
               )}
               <li>
                 <Link
-                  to="/environmental-management"
+                  to="/services/environmental"
                   className="text-[0.9375rem] text-white/70 transition-colors duration-200 hover:text-white">
                   
                   Environmental Management

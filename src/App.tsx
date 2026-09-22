@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { OrganizationSchema } from './components/Seo';
@@ -39,7 +39,11 @@ export function App() {
             <Route path="/experience" element={<Experience />} />
             <Route path="/leadership" element={<LeadershipPage />} />
             <Route path="/contact" element={<Contact />} />
-            <Route path="/environmental-management" element={<EnvironmentalManagement />} />
+            {/* Canonical per docs/DECISIONS.md Decision 2 — consistent with the other four
+                /services/<slug> pages. Old path kept as a redirect, not removed, so existing
+                links/bookmarks/search results still resolve. */}
+            <Route path="/services/environmental" element={<EnvironmentalManagement />} />
+            <Route path="/environmental-management" element={<Navigate to="/services/environmental" replace />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="*" element={<NotFound />} />
