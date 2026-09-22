@@ -179,3 +179,11 @@ export const serviceOptions = [
 'Training & Skills Development',
 'Environmental Management',
 'General Enquiry'];
+
+/** Slug + label pairs for forms that need to store a service_slug (request-service, request-a-quote). */
+export const serviceSlugOptions: { slug: string; label: string }[] = [
+{ slug: 'health-safety-compliance', label: 'Health, Safety & Compliance' },
+{ slug: 'business-consulting', label: 'Business Consulting' },
+{ slug: 'procurement-supply', label: 'Procurement & Supply' },
+{ slug: 'training-skills-development', label: 'Training & Skills Development' },
+{ slug: 'environmental', label: 'Environmental Management' }];
