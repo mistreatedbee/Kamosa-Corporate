@@ -19,6 +19,13 @@ export interface Industry {
   description: string;
   image: string;
   imageAlt: string;
+  /** Below: used by the dedicated /industries page selector, optional so the existing homepage
+   * IndustryGrid (which only needs name/description/image) keeps working unchanged. */
+  slug?: string;
+  overview?: string;
+  servicesRelevant?: string[];
+  noConfirmedTrackRecord?: boolean;
+  disclosureStatement?: string;
 }
 
 export interface ValueItem {

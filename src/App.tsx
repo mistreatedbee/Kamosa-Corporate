@@ -8,7 +8,9 @@ import { About } from './pages/About';
 import { Services } from './pages/Services';
 import { ServiceDetail } from './pages/ServiceDetail';
 import { Experience } from './pages/Experience';
+import { Industries } from './pages/Industries';
 import { LeadershipPage } from './pages/LeadershipPage';
+import { Credentials } from './pages/Credentials';
 import { Contact } from './pages/Contact';
 import { RequestAQuote } from './pages/RequestAQuote';
 import { RequestService } from './pages/RequestService';
@@ -39,7 +41,9 @@ export function App() {
             <Route path="/services" element={<Services />} />
             <Route path="/services/:slug" element={<ServiceDetail />} />
             <Route path="/experience" element={<Experience />} />
+            <Route path="/industries" element={<Industries />} />
             <Route path="/leadership" element={<LeadershipPage />} />
+            <Route path="/credentials" element={<Credentials />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/request-a-quote" element={<RequestAQuote />} />
             <Route path="/request-service" element={<RequestService />} />

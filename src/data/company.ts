@@ -31,6 +31,7 @@ export const company = {
 export const navLinks = [
 { label: 'About', to: '/about' },
 { label: 'Services', to: '/services' },
+{ label: 'Industries', to: '/industries' },
 { label: 'Experience', to: '/experience' },
 { label: 'Leadership', to: '/leadership' },
 { label: 'Contact', to: '/contact' }];
