@@ -1,4 +1,3 @@
-import React from 'react';
 import { Container } from './Container';
 import { Reveal } from './Reveal';
 import { trustMarkers } from '../data/company';

@@ -1,4 +1,3 @@
-import React from 'react';
 import { GlobeIcon, MailIcon, MapPinIcon, PhoneIcon } from 'lucide-react';
 import { Seo } from '../components/Seo';
 import { PageHeader } from '../components/PageHeader';

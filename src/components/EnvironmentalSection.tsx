@@ -1,4 +1,3 @@
-import React from 'react';
 import { LeafIcon } from 'lucide-react';
 import { Container } from './Container';
 import { Reveal } from './Reveal';

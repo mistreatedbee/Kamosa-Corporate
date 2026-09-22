@@ -1,4 +1,3 @@
-import React from 'react';
 import { ShieldCheckIcon } from 'lucide-react';
 import { Container } from './Container';
 import { Reveal } from './Reveal';
