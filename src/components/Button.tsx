@@ -5,7 +5,7 @@ import { ArrowRightIcon } from 'lucide-react';
 type Variant = 'primary' | 'secondary' | 'outline' | 'text';
 
 const base =
-'group inline-flex items-center justify-center gap-2.5 font-display text-sm font-semibold tracking-tight transition-[background-color,color,border-color,box-shadow] duration-200 ease-editorial';
+'group inline-flex items-center justify-center gap-2.5 font-display text-sm font-semibold tracking-tight transition-[background-color,color,border-color,box-shadow] duration-200 ease-editorial focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current';
 
 const variants: Record<Variant, string> = {
   primary: 'bg-brand-600 text-white px-6 py-3.5 hover:bg-ink-700 rounded-sm',
