@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  build-and-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck
+        run: npx tsc --noEmit
+
+      - name: Lint
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx
+
+      - name: Build
+        run: npx vite build
+
+      # Non-negotiable per docs/QA_TESTING_STRATEGY.md: the Supabase service-role key bypasses RLS
+      # entirely, so a leak into the client bundle is equivalent to having no RLS at all — the direct
+      # forward-looking equivalent of the original hardcoded-admin-password-in-the-bundle incident.
+      # This step fails the build if any known secret-shaped pattern appears in dist/.
+      - name: Verify no server-side secrets leaked into the client bundle
+        run: |
+          set -e
+          FOUND=0
+          if grep -r "sb_secret_" dist/ 2>/dev/null; then
+            echo "::error::Found a Supabase secret key (sb_secret_ prefix) in the client bundle!"
+            FOUND=1
+          fi
+          if grep -r '"role":"service_role"' dist/ 2>/dev/null; then
+            echo "::error::Found a service_role JWT claim in the client bundle!"
+            FOUND=1
+          fi
+          if grep -rE "SUPABASE_SERVICE_ROLE_KEY|SUPABASE_DB_URL|SUPABASE_DB_POOLER_URL" dist/ 2>/dev/null; then
+            echo "::error::Found a server-side-only env var name in the client bundle!"
+            FOUND=1
+          fi
+          if [ "$FOUND" = "1" ]; then
+            exit 1
+          fi
+          echo "OK: no server-side secret patterns found in dist/."
