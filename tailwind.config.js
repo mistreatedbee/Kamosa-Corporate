@@ -25,6 +25,26 @@ export default {
         cream: '#D9D5D4',
         muted: '#6B6B6B',
         hairline: '#E8E2E1',
+        success: {
+          DEFAULT: '#1E7A3D',
+          600: '#1E7A3D',
+          50: '#EAF5EE',
+        },
+        warning: {
+          DEFAULT: '#B7791B',
+          600: '#B7791B',
+          50: '#FBF3E4',
+        },
+        error: {
+          DEFAULT: '#B3261E',
+          600: '#B3261E',
+          50: '#FBEAE9',
+        },
+        info: {
+          DEFAULT: '#2E5F8A',
+          600: '#2E5F8A',
+          50: '#EAF1F7',
+        },
       },
       fontFamily: {
         display: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],

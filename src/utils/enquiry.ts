@@ -9,36 +9,29 @@ export interface EnquiryPayload {
 
 export type EnquiryResult =
 {status: 'sent';} |
-{status: 'unconfigured';} |
 {status: 'error';message: string;};
 
-/**
- * Endpoint for enquiry submissions.
- *
- * TODO — BACKEND INTEGRATION REQUIRED.
- * No submission endpoint exists yet. Until one is supplied, the form deliberately
- * does NOT claim an enquiry was delivered; it returns `unconfigured` and directs the
- * visitor to telephone or email instead. Set ENQUIRY_ENDPOINT to the live endpoint
- * and the "sent" path below becomes active with no other changes required.
- */
-const ENQUIRY_ENDPOINT: string | null = null;
+/** Serverless function (Vercel) backing enquiry submissions — see /api/enquiry.ts. */
+const ENQUIRY_ENDPOINT = '/api/enquiry';
 
-export async function submitEnquiry(payload: EnquiryPayload): Promise<EnquiryResult> {
-  if (!ENQUIRY_ENDPOINT) {
-    // Brief delay so the loading state is honest about work being attempted.
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    return { status: 'unconfigured' };
-  }
-
+export async function submitEnquiry(
+  payload: EnquiryPayload,
+  antiSpam: { website: string; formRenderedAt: number }
+): Promise<EnquiryResult> {
   try {
     const response = await fetch(ENQUIRY_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify({ ...payload, ...antiSpam })
     });
 
-    if (!response.ok) {
+    if (!response.ok && response.status !== 429) {
       return { status: 'error', message: 'We could not submit your enquiry. Please try again or contact us directly.' };
+    }
+
+    const data = await response.json().catch(() => null);
+    if (data?.status === 'error') {
+      return { status: 'error', message: data.message || 'We could not submit your enquiry. Please try again or contact us directly.' };
     }
 
     return { status: 'sent' };

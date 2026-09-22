@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { AlertCircleIcon, CheckCircle2Icon, InfoIcon, Loader2Icon } from 'lucide-react';
+import { AlertCircleIcon, CheckCircle2Icon, Loader2Icon } from 'lucide-react';
 import { Button } from './Button';
 import { serviceOptions } from '../data/services';
 import { company } from '../data/company';
@@ -18,7 +18,7 @@ const EMPTY: EnquiryPayload = {
 
 const fieldClass =
 'w-full rounded-sm border border-hairline bg-white px-4 py-3.5 font-sans text-[0.9375rem] text-ink-900 transition-colors duration-200 placeholder:text-muted/60 hover:border-muted/50 focus:border-brand-600';
-const errorFieldClass = 'border-[#B3261E] hover:border-[#B3261E]';
+const errorFieldClass = 'border-error-600 hover:border-error-600';
 const labelClass = 'block font-display text-[0.8125rem] font-semibold text-ink-900';
 
 export function ContactForm() {
@@ -26,7 +26,9 @@ export function ContactForm() {
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<EnquiryResult | null>(null);
+  const [honeypot, setHoneypot] = useState('');
   const statusRef = useRef<HTMLDivElement>(null);
+  const formRenderedAt = useRef(Date.now());
 
   const update = (key: keyof EnquiryPayload) => (
   event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -48,7 +50,7 @@ export function ContactForm() {
     }
 
     setSubmitting(true);
-    const outcome = await submitEnquiry(values);
+    const outcome = await submitEnquiry(values, { website: honeypot, formRenderedAt: formRenderedAt.current });
     setSubmitting(false);
     setResult(outcome);
 
@@ -65,6 +67,20 @@ export function ContactForm() {
       <p className="mt-2.5 text-[0.9375rem] leading-relaxed text-muted">
         Tell us about your operation and requirement. Fields marked with an asterisk are required.
       </p>
+
+      {/* Honeypot: hidden from sighted and screen-reader users, but present in the DOM for
+          simple bots that fill every field. Real visitors never see or populate this. */}
+      <div aria-hidden="true" className="absolute left-[-9999px] top-auto h-0 w-0 overflow-hidden">
+        <label htmlFor="enquiry-website">Website</label>
+        <input
+          id="enquiry-website"
+          name="website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={honeypot}
+          onChange={(event) => setHoneypot(event.target.value)} />
+      </div>
 
       <div className="mt-8 grid gap-6 sm:grid-cols-2">
         <div>
@@ -220,21 +236,6 @@ export function ContactForm() {
             {result.message} Your details have been kept so you can try again.
           </Notice> :
         null}
-
-        {result?.status === 'unconfigured' ?
-        <Notice tone="info" icon={InfoIcon}>
-            <span className="font-semibold">This form is not yet connected to a mailbox.</span> Your enquiry has{' '}
-            <span className="font-semibold">not</span> been sent. Please contact us directly on{' '}
-            <a href={company.phoneHref} className="font-medium text-brand-600 underline underline-offset-2">
-              {company.phone}
-            </a>{' '}
-            or{' '}
-            <a href={company.emailHref} className="font-medium text-brand-600 underline underline-offset-2">
-              {company.email}
-            </a>
-            . Your details have been kept on screen.
-          </Notice> :
-        null}
       </div>
     </form>);
 
@@ -243,7 +244,7 @@ export function ContactForm() {
 function FieldError({ id, message }: {id: string;message?: string;}) {
   if (!message) return null;
   return (
-    <p id={id} className="mt-2 flex items-start gap-1.5 text-[0.8125rem] leading-snug text-[#B3261E]">
+    <p id={id} className="mt-2 flex items-start gap-1.5 text-[0.8125rem] leading-snug text-error-600">
       <AlertCircleIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" aria-hidden="true" />
       {message}
     </p>);
@@ -257,9 +258,9 @@ interface NoticeProps {
 }
 
 const noticeTones: Record<NoticeProps['tone'], string> = {
-  success: 'border-brand-600/40 bg-brand-600/5 text-ink-900',
-  error: 'border-[#B3261E]/40 bg-[#B3261E]/5 text-ink-900',
-  info: 'border-gold/50 bg-gold/10 text-ink-900'
+  success: 'border-success-600/40 bg-success-50 text-ink-900',
+  error: 'border-error-600/40 bg-error-50 text-ink-900',
+  info: 'border-info-600/40 bg-info-50 text-ink-900'
 };
 
 function Notice({ tone, icon: Icon, children }: NoticeProps) {
