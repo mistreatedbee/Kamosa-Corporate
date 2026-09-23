@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { rejectIfUnauthorized } from '../_lib/adminSession';
+import { rejectIfUnauthorized } from '../_lib/adminSession.js';
 
 // Read-only admin enquiry inbox — deliberately tight scope per the CTO's directive: no editing,
 // no notes, no CRM yet. Just visibility into leads that were previously landing in a table nobody

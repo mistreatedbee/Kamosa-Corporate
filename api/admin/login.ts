@@ -1,5 +1,5 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { mintSessionCookie, verifyAdminKey } from '../_lib/adminSession';
+import { mintSessionCookie, verifyAdminKey } from '../_lib/adminSession.js';
 
 // STOPGAP per docs/SECURITY_ARCHITECTURE.md Finding 1.1 — see api/_lib/adminSession.ts header
 // comment. This endpoint is the ONLY place the raw ADMIN_API_KEY is ever checked; every other

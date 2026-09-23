@@ -1,7 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'node:crypto';
-import { notifyByEmail } from './_lib/notifyEmail';
+import { notifyByEmail } from './_lib/notifyEmail.js';
 
 // Same security posture as api/enquiry.ts: insert-only RLS, service role used server-side only,
 // honeypot + timing anti-spam, per-IP rate limiting, hashed IPs. See that file's comments for the

@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'node:crypto';
-import { validateEnquiry, type EnquiryPayload } from '../src/utils/enquiry';
-import { notifyByEmail } from './_lib/notifyEmail';
+import { validateEnquiry, type EnquiryPayload } from '../src/utils/enquiry.js';
+import { notifyByEmail } from './_lib/notifyEmail.js';
 
 // Phase 1 enquiry backend. Writes to Postgres (docs/DECISIONS.md Decision 1) — an email-only lead
 // is a lead you can lose. Security posture per docs/SECURITY_ARCHITECTURE.md and
