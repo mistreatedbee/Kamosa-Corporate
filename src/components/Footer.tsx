@@ -8,6 +8,7 @@ const companyLinks = [
 { label: 'Experience', to: '/experience' },
 { label: 'Leadership', to: '/leadership' },
 { label: 'Credentials', to: '/credentials' },
+{ label: 'FAQ', to: '/faq' },
 { label: 'Contact', to: '/contact' },
 { label: 'Request a Quote', to: '/request-a-quote' },
 { label: 'Request a Service', to: '/request-service' }];
