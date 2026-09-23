@@ -1,11 +1,15 @@
 name: Post-Deploy Smoke Check
 
 # Triggers on Vercel's GitHub deployment status updates — fires automatically after every real
-# deployment (Vercel's GitHub integration posts these). This exists because of a real incident:
-# every /api/* serverless function was FUNCTION_INVOCATION_FAILED in production for a period while
-# CI (typecheck/lint/build) stayed green the whole time — a build succeeding says nothing about
-# whether the deployed function actually runs. This is the gap-closer: it asserts real HTTP
-# behavior against the live URL, not just that the build completed.
+# deployment (Vercel's GitHub integration posts these). This exists because of two real incidents
+# in the same day, both invisible to CI (typecheck/lint/build all stayed green throughout both):
+#   1. Every /api/* serverless function was FUNCTION_INVOCATION_FAILED in production — a build
+#      succeeding says nothing about whether the deployed function actually runs.
+#   2. Adding vercel.json for security headers silently disabled Vercel's automatic SPA fallback
+#      rewrite — every non-root route (/about, /faq, /credentials, /admin/login, ...) returned a
+#      real Vercel 404 on direct navigation, while "/" kept working and client-side <Link> nav
+#      masked it entirely. The FIRST version of this very check only tested "/" and would not have
+#      caught it — this is why every check below hits a real nested route, not just the homepage.
 
 on:
   deployment_status:
@@ -21,20 +25,34 @@ jobs:
           URL="${{ github.event.deployment_status.target_url }}"
           echo "Smoke-checking deployment at $URL"
 
-          PUBLIC_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -m 20 "$URL/")
-          if [ "$PUBLIC_STATUS" != "200" ]; then
-            echo "::error::Homepage returned HTTP $PUBLIC_STATUS, expected 200 — the deployed site is not serving pages."
-            exit 1
-          fi
+          FAILED=0
+
+          # A representative spread of route types: a top-level page, a nested static page, a
+          # dynamic-slug page, and the admin (separate layout tree) login page — chosen specifically
+          # because incident #2 broke every one of these categories except "/" itself.
+          for path in "/" "/about" "/faq" "/credentials" "/services/health-safety-compliance" "/admin/login"; do
+            STATUS=$(curl -s -o /dev/null -m 20 -w "%{http_code}" "$URL$path")
+            if [ "$STATUS" != "200" ]; then
+              echo "::error::$path returned HTTP $STATUS, expected 200 — this is the exact SPA-routing failure class from incident #2 (every route except / returning a real 404)."
+              FAILED=1
+            else
+              echo "OK: $path -> 200"
+            fi
+          done
 
           # api/admin/logout has zero external dependencies (no Supabase, no env-var-dependent
           # logic beyond setting a cookie) — the simplest possible canary for "do serverless
           # functions execute at all on this deployment." A 500 here means every function is
-          # almost certainly broken, exactly as happened in the incident this workflow exists for.
+          # almost certainly broken, exactly as happened in incident #1.
           API_STATUS=$(curl -s -o /dev/null -w "%{http_code}" -m 20 -X POST "$URL/api/admin/logout")
           if [ "$API_STATUS" = "500" ]; then
-            echo "::error::api/admin/logout returned HTTP 500 (FUNCTION_INVOCATION_FAILED or similar) on the live deployment — serverless functions are broken. This is the exact failure class that motivated this check."
-            exit 1
+            echo "::error::api/admin/logout returned HTTP 500 (FUNCTION_INVOCATION_FAILED or similar) on the live deployment — serverless functions are broken. This is incident #1's failure class."
+            FAILED=1
+          else
+            echo "OK: api/admin/logout -> $API_STATUS (not 500)"
           fi
 
-          echo "OK: $URL is serving real responses from both the static site and a serverless function."
+          if [ "$FAILED" = "1" ]; then
+            exit 1
+          fi
+          echo "OK: $URL is serving real responses from every route category and a serverless function."
