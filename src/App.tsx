@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
+import { StickyWhatsAppButton } from './components/StickyWhatsAppButton';
 import { OrganizationSchema } from './components/Seo';
 import { Home } from './pages/Home';
 import { About } from './pages/About';
@@ -58,6 +59,7 @@ export function App() {
           </Routes>
         </main>
         <Footer />
+        <StickyWhatsAppButton />
       </div>
     </BrowserRouter>);
 

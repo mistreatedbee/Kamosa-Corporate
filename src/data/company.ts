@@ -6,6 +6,7 @@ export const company = {
   csd: 'MAAA1465904',
   phone: '071 191 4744',
   phoneHref: 'tel:+27711914744',
+  whatsappNumber: '27711914744',
   email: 'info@kamosa.co.za',
   emailHref: 'mailto:info@kamosa.co.za',
   website: 'www.kamosa.co.za',

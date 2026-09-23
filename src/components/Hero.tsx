@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { ButtonLink } from './Button';
+import { WhatsAppButton } from './WhatsAppButton';
 
 const EYEBROW = ['Health', 'Safety', 'Compliance', 'Business Solutions'];
 
@@ -58,6 +59,7 @@ export function Hero() {
               <ButtonLink to="/contact" variant="outline" inverted>
                 Get in Touch
               </ButtonLink>
+              <WhatsAppButton inverted />
             </motion.div>
 
             <motion.dl

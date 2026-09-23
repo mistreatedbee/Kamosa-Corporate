@@ -1,9 +1,15 @@
 import { Container } from './Container';
 import { Reveal } from './Reveal';
 import { ButtonAnchor, ButtonLink } from './Button';
+import { WhatsAppButton } from './WhatsAppButton';
 import { company } from '../data/company';
 
-export function CTASection() {
+interface CTASectionProps {
+  /** Service-aware pre-filled WhatsApp message, e.g. for a specific service/industry page. */
+  whatsappMessage?: string;
+}
+
+export function CTASection({ whatsappMessage }: CTASectionProps = {}) {
   return (
     <section className="bg-ink-900" aria-labelledby="cta-heading">
       <Container className="py-16 lg:py-24">
@@ -23,6 +29,7 @@ export function CTASection() {
               <ButtonLink to="/contact" variant="secondary">
                 Send an Enquiry
               </ButtonLink>
+              <WhatsAppButton inverted message={whatsappMessage} />
               <ButtonAnchor href={company.phoneHref} variant="outline" inverted withArrow={false}>
                 Call {company.phone}
               </ButtonAnchor>

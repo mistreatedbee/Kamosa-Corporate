@@ -111,7 +111,7 @@ export function ServiceDetail() {
         </Container>
       </section>
 
-      <CTASection />
+      <CTASection whatsappMessage={`Hi, I'm interested in ${service.title} and would like a quote.`} />
     </>);
 
 }
