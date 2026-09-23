@@ -1,17 +1,21 @@
-import { Link, Navigate, useParams } from 'react-router-dom';
+import { Link, useParams } from 'react-router-dom';
 import { ArrowRightIcon } from 'lucide-react';
 import { Seo } from '../components/Seo';
 import { PageHeader } from '../components/PageHeader';
 import { Container } from '../components/Container';
 import { Reveal } from '../components/Reveal';
 import { CTASection } from '../components/CTASection';
+import { NotFound } from './NotFound';
 import { services } from '../data/services';
 
 export function ServiceDetail() {
   const { slug } = useParams<{slug: string;}>();
   const service = services.find((item) => item.slug === slug);
 
-  if (!service) return <Navigate to="/services" replace />;
+  // Per docs/EXISTING_AUDIT_SUMMARY.md's flagged bug: this used to silently redirect to /services,
+  // leaving a mistyped/stale link visitor with no explanation. Render the real 404 state instead,
+  // at the URL they actually requested.
+  if (!service) return <NotFound />;
 
   const others = services.filter((item) => item.slug !== service.slug);
 
