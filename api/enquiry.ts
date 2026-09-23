@@ -2,6 +2,7 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'node:crypto';
 import { validateEnquiry, type EnquiryPayload } from '../src/utils/enquiry';
+import { notifyByEmail } from './_lib/notifyEmail';
 
 // Phase 1 enquiry backend. Writes to Postgres (docs/DECISIONS.md Decision 1) — an email-only lead
 // is a lead you can lose. Security posture per docs/SECURITY_ARCHITECTURE.md and
@@ -137,9 +138,19 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       .json({ status: 'error', message: 'We could not submit your enquiry. Please try again or contact us directly.' });
   }
 
-  // No email notification yet: no email provider (Resend/SendGrid) account/API key has been
-  // supplied. The enquiry is durably stored in Postgres regardless (docs/DECISIONS.md Decision 1),
-  // and is visible to admin tooling once Phase 2 ships. Wiring an email notification later is a
-  // small addition here, not a redesign.
+  // No-ops until RESEND_API_KEY is set — see api/_lib/notifyEmail.ts. Never blocks the response;
+  // the lead is already durably in Postgres by this point regardless.
+  await notifyByEmail({
+    subject: 'New Kamosa Website Enquiry',
+    lines: [
+      { label: 'Name', value: payload.name.trim() },
+      { label: 'Company', value: payload.company.trim() || '—' },
+      { label: 'Email', value: payload.email.trim() },
+      { label: 'Phone', value: payload.phone.trim() || '—' },
+      { label: 'Service', value: payload.service.trim() || '—' },
+      { label: 'Message', value: payload.message.trim() }
+    ]
+  });
+
   return res.status(200).json({ status: 'sent' });
 }

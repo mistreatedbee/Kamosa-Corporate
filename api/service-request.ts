@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'node:crypto';
+import { notifyByEmail } from './_lib/notifyEmail';
 
 // Lighter sibling of api/enquiry.ts and api/quote-request.ts — same security posture (insert-only
 // RLS, service role server-side only, honeypot + timing check, per-IP rate limiting, hashed IPs).
@@ -129,6 +130,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     urgency: 'standard'
   });
   void detailError; // Non-fatal — see api/quote-request.ts for the same reasoning.
+
+  await notifyByEmail({
+    subject: 'New Service Request',
+    lines: [
+      { label: 'Name', value: body.name.trim() },
+      { label: 'Email', value: body.email.trim() },
+      { label: 'Phone', value: body.phone?.trim() || '—' },
+      { label: 'Service', value: body.serviceSlug.trim() },
+      { label: 'Description', value: body.description.trim() }
+    ]
+  });
 
   return res.status(200).json({ status: 'sent' });
 }

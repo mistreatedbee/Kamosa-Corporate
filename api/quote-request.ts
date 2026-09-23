@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'node:crypto';
+import { notifyByEmail } from './_lib/notifyEmail';
 
 // Same security posture as api/enquiry.ts: insert-only RLS, service role used server-side only,
 // honeypot + timing anti-spam, per-IP rate limiting, hashed IPs. See that file's comments for the
@@ -165,10 +166,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     });
     // A failed detail-row insert shouldn't fail the whole request — the lead itself is already
     // saved in `enquiries`; the structured detail is a nice-to-have for admin triage.
-    if (detailError) {
-      // Swallowed intentionally; the enquiry row is the source of truth for "did we get the lead."
-    }
+    void detailError; // Swallowed intentionally; the enquiry row is the source of truth for "did we get the lead."
   }
+
+  const detailLines = Object.entries(body.details || {})
+    .filter(([, value]) => value !== undefined && value !== null && String(value).trim() !== '')
+    .map(([key, value]) => ({ label: key.replace(/_/g, ' '), value: String(value) }));
+
+  await notifyByEmail({
+    subject: 'New Quote Request',
+    lines: [
+      { label: 'Name', value: body.name.trim() },
+      { label: 'Company', value: body.company?.trim() || '—' },
+      { label: 'Email', value: body.email.trim() },
+      { label: 'Phone', value: body.phone?.trim() || '—' },
+      { label: 'Service', value: body.serviceSlug.trim() },
+      { label: 'Category', value: body.category },
+      ...detailLines,
+      ...(body.category === 'other' ? [{ label: 'Details', value: body.freeText?.trim() || '' }] : [])
+    ]
+  });
 
   return res.status(200).json({ status: 'sent' });
 }
