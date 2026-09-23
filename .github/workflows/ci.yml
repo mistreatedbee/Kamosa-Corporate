@@ -52,3 +52,26 @@ jobs:
             exit 1
           fi
           echo "OK: no server-side secret patterns found in dist/."
+
+      # Per docs/SECURITY_ARCHITECTURE.md Finding 1.1 (the CTO's explicit condition for shipping
+      # the admin inbox): every /api/admin/* data endpoint must call the session-auth guard before
+      # doing anything else. login.ts and logout.ts are the auth boundary itself and are exempt —
+      # every other file under api/admin/ must reference rejectIfUnauthorized, or this fails.
+      - name: Verify every admin API endpoint enforces the session auth guard
+        run: |
+          set -e
+          FAILED=0
+          for f in api/admin/*.ts; do
+            base=$(basename "$f")
+            if [ "$base" = "login.ts" ] || [ "$base" = "logout.ts" ]; then
+              continue
+            fi
+            if ! grep -q "rejectIfUnauthorized" "$f"; then
+              echo "::error file=$f::Admin endpoint does not call rejectIfUnauthorized — this is the exact class of gap that caused the original hardcoded-admin-auth incident."
+              FAILED=1
+            fi
+          done
+          if [ "$FAILED" = "1" ]; then
+            exit 1
+          fi
+          echo "OK: every admin data endpoint enforces the session auth guard."

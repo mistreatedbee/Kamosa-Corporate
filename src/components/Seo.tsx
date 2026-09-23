@@ -28,16 +28,18 @@ interface SeoProps {
   description: string;
   /** Optional absolute or CDN image URL for social cards. */
   image?: string;
+  /** Portal/admin routes must not be indexed — per docs/SEO_ACCESSIBILITY_PLAN.md. */
+  noindex?: boolean;
 }
 
-export function Seo({ title, description, image }: SeoProps) {
+export function Seo({ title, description, image, noindex = false }: SeoProps) {
   const { pathname } = useLocation();
 
   useEffect(() => {
     const canonical = `${SITE_URL}${pathname === '/' ? '' : pathname}`;
     document.title = title;
     upsertMeta('name', 'description', description);
-    upsertMeta('name', 'robots', 'index, follow');
+    upsertMeta('name', 'robots', noindex ? 'noindex, nofollow' : 'index, follow');
     upsertLink('canonical', canonical);
 
     upsertMeta('property', 'og:type', 'website');
@@ -55,7 +57,7 @@ export function Seo({ title, description, image }: SeoProps) {
       upsertMeta('property', 'og:image', image);
       upsertMeta('name', 'twitter:image', image);
     }
-  }, [title, description, image, pathname]);
+  }, [title, description, image, noindex, pathname]);
 
   return null;
 }
