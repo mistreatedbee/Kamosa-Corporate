@@ -65,6 +65,14 @@ export function Seo({ title, description, image, noindex = false }: SeoProps) {
 /*
  * Organization structured data. LocalBusiness schema is deliberately NOT used:
  * it requires a confirmed physical address, which the client has not yet supplied.
+ *
+ * CSP COUPLING: this script's exact JSON content is allow-listed in vercel.json's
+ * Content-Security-Policy via a sha256 hash (script-src). If you change ANY byte of the
+ * object below, the CSP hash goes stale and this script gets silently blocked in production
+ * again (search engines lose the structured data — no visible breakage otherwise). Recompute
+ * with `node -e "console.log('sha256-' + require('crypto').createHash('sha256').update(<paste-the-exact-json-string>).digest('base64'))"`
+ * or read the real value from a securitypolicyviolation event / Chrome's console warning
+ * against a live deploy, and update vercel.json's script-src to match.
  */
 export function OrganizationSchema() {
   useEffect(() => {
