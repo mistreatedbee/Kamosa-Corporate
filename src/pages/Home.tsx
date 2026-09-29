@@ -3,6 +3,7 @@ import { Hero } from '../components/Hero';
 import { TrustStrip } from '../components/TrustStrip';
 import { AboutSection } from '../components/AboutSection';
 import { ServicesGrid } from '../components/ServicesGrid';
+import { AdditionalServices } from '../components/AdditionalServices';
 import { IndustryGrid } from '../components/IndustryGrid';
 import { ExperienceSection } from '../components/ExperienceSection';
 import { WhyKamosa } from '../components/WhyKamosa';
@@ -23,6 +24,7 @@ export function Home() {
       <TrustStrip />
       <AboutSection />
       <ServicesGrid background="cream" />
+      <AdditionalServices background="white" />
       <IndustryGrid />
       <ExperienceSection condensed />
       <WhyKamosa />

@@ -35,11 +35,19 @@ function CtaArrow() {
   );
 }
 
-export function AdditionalServices() {
+interface AdditionalServicesProps {
+  /** Set to 'white' when preceded by another cream section (e.g. the homepage's ServicesGrid),
+   * so sections keep alternating background rhythm — matches ServicesGrid's existing pattern. */
+  background?: 'cream' | 'white';
+}
+
+export function AdditionalServices({ background = 'cream' }: AdditionalServicesProps) {
   const [pricingOpen, setPricingOpen] = useState(false);
 
   return (
-    <section className="kamosa-section bg-cream" aria-labelledby="additional-services-heading">
+    <section
+      className={`kamosa-section ${background === 'cream' ? 'bg-cream' : 'bg-white'}`}
+      aria-labelledby="additional-services-heading">
       <Container>
         <SectionHeader
           eyebrow="Extended Capability"
