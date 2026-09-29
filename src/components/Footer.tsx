@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { LockIcon } from 'lucide-react';
 import { Container } from './Container';
 import { company } from '../data/company';
 import { services } from '../data/services';
@@ -107,6 +108,12 @@ export function Footer() {
             <span>CSD {company.csd}</span>
           </div>
           <div className="flex items-center gap-6 text-[0.8125rem]">
+            <Link
+              to="/admin/login"
+              aria-label="Admin login"
+              className="text-white/25 transition-colors duration-200 hover:text-white/60 focus-visible:text-white/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/60">
+              <LockIcon className="h-3.5 w-3.5" aria-hidden={true} />
+            </Link>
             <Link to="/privacy" className="text-white/60 transition-colors duration-200 hover:text-white">
               Privacy Policy
             </Link>
