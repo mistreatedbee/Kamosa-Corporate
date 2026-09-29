@@ -7,7 +7,8 @@ import {
   Loader2Icon,
   ShieldCheckIcon,
   TruckIcon,
-  UsersIcon
+  UsersIcon,
+  type LucideIcon
 } from 'lucide-react';
 import { Seo } from '../components/Seo';
 import { PageHeader } from '../components/PageHeader';
@@ -27,7 +28,7 @@ interface ServiceCardDef {
   serviceSlug: string;
   label: string;
   preview: string;
-  icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>;
+  icon: LucideIcon;
 }
 
 const SERVICE_CARDS: ServiceCardDef[] = [
@@ -420,7 +421,7 @@ function Field({
 
 interface NoticeProps {
   tone: 'success' | 'error';
-  icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>;
+  icon: LucideIcon;
   children: React.ReactNode;
 }
 

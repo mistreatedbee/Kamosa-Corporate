@@ -5,7 +5,8 @@ import {
   ClipboardCheckIcon,
   CloudIcon,
   HeartPulseIcon,
-  UserCheckIcon
+  UserCheckIcon,
+  type LucideIcon
 } from 'lucide-react';
 import { Container } from './Container';
 import { Reveal } from './Reveal';
@@ -14,7 +15,7 @@ import { SafeCloudPricingModal } from './SafeCloudPricingModal';
 import { additionalServices } from '../data/additionalServices';
 import type { AdditionalService } from '../types/content';
 
-const ICONS: Record<AdditionalService['icon'], React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>> = {
+const ICONS: Record<AdditionalService['icon'], LucideIcon> = {
   wellness: HeartPulseIcon,
   safecloud: CloudIcon,
   mentoring: UserCheckIcon,

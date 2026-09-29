@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { AlertCircleIcon, CheckCircle2Icon, Loader2Icon } from 'lucide-react';
+import { AlertCircleIcon, CheckCircle2Icon, Loader2Icon, type LucideIcon } from 'lucide-react';
 import { Seo } from '../components/Seo';
 import { PageHeader } from '../components/PageHeader';
 import { Container } from '../components/Container';
@@ -218,7 +218,7 @@ function FieldError({ id, message }: { id: string; message?: string }) {
 
 interface NoticeProps {
   tone: 'success' | 'error';
-  icon: React.ComponentType<{ className?: string; 'aria-hidden'?: boolean }>;
+  icon: LucideIcon;
   children: React.ReactNode;
 }
 

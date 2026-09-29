@@ -16,14 +16,21 @@ on:
 
 jobs:
   smoke-check:
-    if: github.event.deployment_status.state == 'success'
+    # Only production deployments: github.event.deployment_status.target_url is the unique
+    # per-deployment URL (e.g. kamosa-corporate-<hash>-<team>.vercel.app), which Vercel puts behind
+    # its own login wall (Deployment Protection) by default — even for production deployments. That
+    # URL always 302-redirects to vercel.com/sso-api regardless of whether the site itself is
+    # healthy, which is a false alarm, not a real failure. The public, unprotected URL is the fixed
+    # production alias below — that's what real visitors and WhatsApp/crawler bots actually use, so
+    # it's the one this check needs to test.
+    if: github.event.deployment_status.state == 'success' && github.event.deployment_status.environment == 'production'
     runs-on: ubuntu-latest
     steps:
       - name: Verify the live deployment actually serves working pages and functions
         run: |
           set -e
-          URL="${{ github.event.deployment_status.target_url }}"
-          echo "Smoke-checking deployment at $URL"
+          URL="https://kamosa-corporate.vercel.app"
+          echo "Smoke-checking production at $URL"
 
           FAILED=0
 
