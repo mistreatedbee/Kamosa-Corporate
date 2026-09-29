@@ -1,6 +1,7 @@
 import { Seo } from '../components/Seo';
 import { PageHeader } from '../components/PageHeader';
 import { ServicesGrid } from '../components/ServicesGrid';
+import { AdditionalServices } from '../components/AdditionalServices';
 import { Methodology } from '../components/Methodology';
 import { EnvironmentalSection } from '../components/EnvironmentalSection';
 import { CTASection } from '../components/CTASection';
@@ -23,6 +24,7 @@ export function Services() {
         }} />
       
       <ServicesGrid withHeader={false} />
+      <AdditionalServices />
       <Methodology />
       <EnvironmentalSection />
       <CTASection />

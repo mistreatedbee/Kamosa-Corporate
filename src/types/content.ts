@@ -50,3 +50,42 @@ export interface ExperienceRecord {
   body: string;
   points: string[];
 }
+
+export interface AdditionalService {
+  slug: string;
+  title: string;
+  description: string;
+  /** Icon key resolved to a lucide-react component in AdditionalServices.tsx. */
+  icon: 'wellness' | 'safecloud' | 'mentoring' | 'sheq';
+  ctaLabel: string;
+  /** Internal route for the primary CTA (mutually exclusive with externalUrl). */
+  to?: string;
+  /** External URL for the primary CTA, opened in a new tab (mutually exclusive with `to`). */
+  externalUrl?: string;
+  /** Only SafeCloud has a secondary CTA (opens the pricing modal). */
+  secondaryCtaLabel?: string;
+}
+
+export interface SafeCloudPlan {
+  name: string;
+  employees: string;
+  price: string;
+  period: string;
+  description: string;
+  features: string[];
+  cta: string;
+  /** Present for the five fixed-price plans (external registration link). */
+  url?: string;
+  /** Present only for the Custom plan (mailto link instead of a registration URL). */
+  mailto?: string;
+  mostPopular?: boolean;
+}
+
+export interface SheqConsultingOffer {
+  title: string;
+  description: string;
+  rate: string;
+  rateUnit: string;
+  cta: string;
+  mailto: string;
+}
