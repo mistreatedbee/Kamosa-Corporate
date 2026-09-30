@@ -10,6 +10,7 @@ import { WhyKamosa } from '../components/WhyKamosa';
 import { Methodology } from '../components/Methodology';
 import { Leadership } from '../components/Leadership';
 import { EnvironmentalSection } from '../components/EnvironmentalSection';
+import { CareersTeaser } from '../components/CareersTeaser';
 import { CTASection } from '../components/CTASection';
 
 export function Home() {
@@ -31,6 +32,7 @@ export function Home() {
       <Methodology />
       <Leadership condensed />
       <EnvironmentalSection />
+      <CareersTeaser />
       <CTASection />
     </>);
 
