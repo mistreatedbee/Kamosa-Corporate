@@ -1,9 +1,12 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { BarChart3Icon, InboxIcon, LogOutIcon, SettingsIcon, ShieldCheckIcon } from 'lucide-react';
+import { BarChart3Icon, FileTextIcon, InboxIcon, LogOutIcon, MailIcon, SettingsIcon, UsersIcon } from 'lucide-react';
 
 const NAV_ITEMS = [
   { label: 'Enquiries', to: '/admin', icon: InboxIcon, enabled: true },
   { label: 'Reports', to: '', icon: BarChart3Icon, enabled: false },
+  { label: 'Clients', to: '', icon: UsersIcon, enabled: false },
+  { label: 'Documents', to: '', icon: FileTextIcon, enabled: false },
+  { label: 'Email Templates', to: '', icon: MailIcon, enabled: false },
   { label: 'Settings', to: '', icon: SettingsIcon, enabled: false }
 ];
 
@@ -13,8 +16,8 @@ const NAV_ITEMS = [
  * enforced server-side per request by each /api/admin/* endpoint (see api/_lib/adminSession.ts) —
  * this layout has no client-side gate of its own; a page rendering with no data just means the
  * session check on its API call failed and the page should redirect (handled per-page).
- * Reports/Settings are placeholders (disabled, "Soon" badge) — there is no page behind them yet,
- * so they must not be real links.
+ * Every nav item besides Enquiries is a placeholder (disabled, "Soon" badge) — there is no page
+ * behind them yet, so they must not be real links.
  */
 export function AdminLayout() {
   const navigate = useNavigate();
@@ -28,9 +31,7 @@ export function AdminLayout() {
     <div className="flex min-h-screen bg-[#F4F2F1]">
       <aside className="flex w-60 shrink-0 flex-col bg-ink-900">
         <div className="flex items-center gap-2.5 px-5 py-5">
-          <span className="flex h-8 w-8 items-center justify-center rounded-md bg-white/10">
-            <ShieldCheckIcon className="h-4 w-4 text-gold" aria-hidden={true} />
-          </span>
+          <img src="/logo.jpg" alt="Kamosa logo" className="h-8 w-8 rounded-sm object-cover ring-1 ring-white/10" />
           <span className="font-display text-sm font-bold uppercase tracking-[0.14em] text-white">
             Kamosa Admin
           </span>
