@@ -2,18 +2,16 @@ import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'node:crypto';
 
-// Job application backend. The CV file itself is already in Supabase Storage by the time this
-// runs (the client uploads directly to the cv-uploads bucket with the anon key — see
-// src/utils/careers.ts) — this endpoint just validates the submission and records it against a
-// job posting. Same anti-spam and rate-limit posture as api/enquiry.ts.
-//
-// This function uses the service role, so RLS wouldn't stop it from inserting against a
-// draft/closed posting — the "posting must be open" check below is what actually enforces that,
-// mirroring the DB-level insert policy on job_applications that protects every OTHER caller.
+// Combines the public careers listing (GET /api/careers) and the application submission
+// (POST /api/careers/apply) into a single Vercel function. Vercel's Hobby plan caps a deployment
+// at 12 serverless functions — these two were previously separate files, split back out here would
+// blow that budget alongside the admin job-postings endpoints. Behaviour is unchanged from before;
+// only the routing is combined.
 
 const RATE_LIMIT_PER_HOUR = 3;
 const MIN_SUBMISSION_MS = 2000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 interface ApplyRequestBody {
   jobPostingId?: string;
@@ -25,6 +23,15 @@ interface ApplyRequestBody {
   cvFileName?: string;
   website?: string; // honeypot
   formRenderedAt?: number;
+}
+
+function getAnonClient() {
+  const url = process.env.VITE_SUPABASE_URL;
+  const key = process.env.VITE_SUPABASE_ANON_KEY;
+  if (!url || !key) {
+    throw new Error('Supabase environment variables are not configured');
+  }
+  return createClient(url, key, { auth: { persistSession: false } });
 }
 
 function getServiceClient() {
@@ -52,9 +59,44 @@ function isHoneypotTripped(value: unknown): boolean {
   return value.trim().length > 0;
 }
 
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+// GET /api/careers — open postings only, enforced twice: the RLS policy on job_postings already
+// restricts anon/authenticated SELECT to status = 'open', and this filters again explicitly so
+// the intent is obvious from the code, not just the migration.
+async function listPostings(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'GET') {
+    res.setHeader('Allow', 'GET');
+    return res.status(405).json({ status: 'error', message: 'Method not allowed.' });
+  }
 
-export default async function handler(req: VercelRequest, res: VercelResponse) {
+  let supabase;
+  try {
+    supabase = getAnonClient();
+  } catch {
+    return res.status(500).json({ status: 'error', message: 'Server is not configured' });
+  }
+
+  const { data, error } = await supabase
+    .from('job_postings')
+    .select('id, title, department, location, employment_type, summary, requirements, responsibilities, closing_date, created_at')
+    .eq('status', 'open')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    return res.status(500).json({ status: 'error', message: 'Failed to load job postings' });
+  }
+
+  return res.status(200).json({ postings: data ?? [] });
+}
+
+// POST /api/careers/apply — the CV file itself is already in Supabase Storage by the time this
+// runs (the client uploads directly to the cv-uploads bucket with the anon key — see
+// src/utils/careers.ts) — this just validates the submission and records it against a posting.
+// Same anti-spam and rate-limit posture as api/enquiry.ts.
+//
+// This function uses the service role, so RLS wouldn't stop it from inserting against a
+// draft/closed posting — the "posting must be open" check below is what actually enforces that,
+// mirroring the DB-level insert policy on job_applications that protects every OTHER caller.
+async function submitApplication(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return res.status(405).json({ status: 'error', message: 'Method not allowed.' });
@@ -153,4 +195,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   return res.status(200).json({ status: 'sent' });
+}
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  const raw = req.query.action;
+  const segments = Array.isArray(raw) ? raw : raw ? [raw] : [];
+
+  if (segments.length === 0) {
+    return listPostings(req, res);
+  }
+  if (segments.length === 1 && segments[0] === 'apply') {
+    return submitApplication(req, res);
+  }
+  return res.status(404).json({ status: 'error', message: 'Not found.' });
 }
