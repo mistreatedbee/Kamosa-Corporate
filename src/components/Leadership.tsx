@@ -1,4 +1,3 @@
-import { UserIcon } from 'lucide-react';
 import { Container } from './Container';
 import { Reveal } from './Reveal';
 import { ButtonLink } from './Button';
@@ -8,20 +7,28 @@ interface LeadershipProps {
   condensed?: boolean;
 }
 
+function getMonogram(name: string) {
+  const parts = name.trim().split(/\s+/);
+  return ((parts[0]?.[0] ?? '') + (parts[parts.length - 1]?.[0] ?? '')).toUpperCase();
+}
+
 export function Leadership({ condensed = false }: LeadershipProps) {
   return (
     <section className="kamosa-section bg-white" aria-labelledby="leadership-heading">
       <Container>
         <div className="grid gap-12 lg:grid-cols-[0.78fr_1.22fr] lg:gap-20">
           <Reveal>
-            {/* TODO: replace with the approved professional portrait once supplied by the client. */}
+            {/* No portrait supplied yet — a monogram treatment stands in until one is provided. */}
             <figure className="m-0">
-              <div className="flex aspect-[4/5] w-full flex-col items-center justify-center border border-hairline bg-cream px-6 text-center">
-                <UserIcon className="h-9 w-9 text-brand-600/40" aria-hidden="true" />
-                <p className="mt-5 font-display text-sm font-semibold text-ink-900">{leadership.name}</p>
-                <p className="mt-1 text-[0.8125rem] text-muted">{leadership.title}</p>
-                <p className="mt-5 max-w-[16rem] text-[0.75rem] leading-relaxed text-muted/80">
-                  Professional portrait to follow
+              <div className="relative flex aspect-[4/5] w-full flex-col items-center justify-center overflow-hidden bg-ink-900 px-6 text-center">
+                <span aria-hidden="true" className="absolute inset-x-8 top-8 h-px bg-white/10" />
+                <span aria-hidden="true" className="absolute inset-x-8 bottom-8 h-px bg-white/10" />
+                <span className="font-display text-7xl font-extrabold tracking-tight text-gold">
+                  {getMonogram(leadership.name)}
+                </span>
+                <p className="mt-7 font-display text-lg font-bold text-white">{leadership.name}</p>
+                <p className="mt-1.5 text-[0.8125rem] font-semibold uppercase tracking-[0.14em] text-white/60">
+                  {leadership.title}
                 </p>
               </div>
             </figure>
