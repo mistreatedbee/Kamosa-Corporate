@@ -10,6 +10,7 @@ const companyLinks = [
 { label: 'Leadership', to: '/leadership' },
 { label: 'Credentials', to: '/credentials' },
 { label: 'FAQ', to: '/faq' },
+{ label: 'Careers', to: '/careers' },
 { label: 'Contact', to: '/contact' },
 { label: 'Request a Quote', to: '/request-a-quote' },
 { label: 'Request a Service', to: '/request-service' }];

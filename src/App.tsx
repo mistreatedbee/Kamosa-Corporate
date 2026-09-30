@@ -13,6 +13,7 @@ import { LeadershipPage } from './pages/LeadershipPage';
 import { Credentials } from './pages/Credentials';
 import { Contact } from './pages/Contact';
 import { Faq } from './pages/Faq';
+import { Careers } from './pages/Careers';
 import { RequestAQuote } from './pages/RequestAQuote';
 import { RequestService } from './pages/RequestService';
 import { EnvironmentalManagement } from './pages/EnvironmentalManagement';
@@ -21,6 +22,7 @@ import { Terms } from './pages/Terms';
 import { NotFound } from './pages/NotFound';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminEnquiries } from './pages/admin/AdminEnquiries';
+import { AdminJobPostings } from './pages/admin/AdminJobPostings';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -47,6 +49,7 @@ export function App() {
           <Route path="/credentials" element={<Credentials />} />
           <Route path="/contact" element={<Contact />} />
           <Route path="/faq" element={<Faq />} />
+          <Route path="/careers" element={<Careers />} />
           <Route path="/request-a-quote" element={<RequestAQuote />} />
           <Route path="/request-service" element={<RequestService />} />
           {/* Canonical per docs/DECISIONS.md Decision 2 — consistent with the other four
@@ -65,6 +68,7 @@ export function App() {
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<AdminEnquiries />} />
+          <Route path="/admin/careers" element={<AdminJobPostings />} />
         </Route>
       </Routes>
     </BrowserRouter>);

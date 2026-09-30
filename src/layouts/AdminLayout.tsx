@@ -1,10 +1,10 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { BarChart3Icon, FileTextIcon, InboxIcon, LogOutIcon, MailIcon, SettingsIcon, UsersIcon } from 'lucide-react';
+import { BarChart3Icon, BriefcaseIcon, FileTextIcon, InboxIcon, LogOutIcon, MailIcon, SettingsIcon } from 'lucide-react';
 
 const NAV_ITEMS = [
   { label: 'Enquiries', to: '/admin', icon: InboxIcon, enabled: true },
+  { label: 'Careers', to: '/admin/careers', icon: BriefcaseIcon, enabled: true },
   { label: 'Reports', to: '', icon: BarChart3Icon, enabled: false },
-  { label: 'Clients', to: '', icon: UsersIcon, enabled: false },
   { label: 'Documents', to: '', icon: FileTextIcon, enabled: false },
   { label: 'Email Templates', to: '', icon: MailIcon, enabled: false },
   { label: 'Settings', to: '', icon: SettingsIcon, enabled: false }
@@ -16,8 +16,8 @@ const NAV_ITEMS = [
  * enforced server-side per request by each /api/admin/* endpoint (see api/_lib/adminSession.ts) —
  * this layout has no client-side gate of its own; a page rendering with no data just means the
  * session check on its API call failed and the page should redirect (handled per-page).
- * Every nav item besides Enquiries is a placeholder (disabled, "Soon" badge) — there is no page
- * behind them yet, so they must not be real links.
+ * Enquiries and Careers are real; the rest are placeholders (disabled, "Soon" badge) — there is no
+ * page behind them yet, so they must not be real links.
  */
 export function AdminLayout() {
   const navigate = useNavigate();
