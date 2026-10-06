@@ -91,7 +91,7 @@ export async function submitApplication(
   }
 
   try {
-    const response = await fetch('/api/careers/apply', {
+    const response = await fetch('/api/careers', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

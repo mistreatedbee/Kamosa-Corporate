@@ -111,7 +111,7 @@ export function AdminJobPostings() {
 
   const handleDelete = async (id: string) => {
     if (!window.confirm('Delete this job posting? This also deletes any applications submitted to it.')) return;
-    const response = await fetch(`/api/admin/job-postings/${id}`, { method: 'DELETE', credentials: 'include' });
+    const response = await fetch(`/api/admin/job-postings?id=${id}`, { method: 'DELETE', credentials: 'include' });
     if (response.status === 401) {
       navigate('/admin/login', { replace: true });
       return;
@@ -199,7 +199,7 @@ export function AdminJobPostings() {
                 submitLabel="Save changes"
                 onCancel={() => setEditingId(null)}
                 onSubmit={async (values) => {
-                  const response = await fetch(`/api/admin/job-postings/${posting.id}`, {
+                  const response = await fetch(`/api/admin/job-postings?id=${posting.id}`, {
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
@@ -393,7 +393,7 @@ function ApplicationsPanel({ jobPostingId, onUnauthorized }: { jobPostingId: str
   const [applications, setApplications] = useState<Application[] | null>(null);
 
   const load = useCallback(async () => {
-    const response = await fetch(`/api/admin/job-postings/${jobPostingId}/applications`, { credentials: 'include' });
+    const response = await fetch(`/api/admin/job-postings?id=${jobPostingId}&applications=1`, { credentials: 'include' });
     if (response.status === 401) {
       onUnauthorized();
       return;

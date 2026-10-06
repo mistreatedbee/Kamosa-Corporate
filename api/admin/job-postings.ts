@@ -1,15 +1,23 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { rejectIfUnauthorized } from '../../_lib/adminSession.js';
+import { rejectIfUnauthorized } from '../_lib/adminSession.js';
 
 // Combines admin job-posting list/create, single-posting update/delete, and the per-posting
-// applications list into one Vercel function via an optional catch-all route:
-//   GET/POST   /api/admin/job-postings                     (no params)
-//   PATCH/DELETE /api/admin/job-postings/:id                (params = [id])
-//   GET        /api/admin/job-postings/:id/applications     (params = [id, 'applications'])
-// Vercel's Hobby plan caps a deployment at 12 serverless functions; these were three separate
-// files before. Behaviour and payloads are unchanged from before, only the routing is combined.
-// The session guard still runs first, before anything else, on every branch.
+// applications list into one flat function, dispatched by HTTP method plus an `id` / `applications`
+// query string — NOT path segments:
+//   GET    /api/admin/job-postings                        list all
+//   POST   /api/admin/job-postings                         create
+//   PATCH  /api/admin/job-postings?id=<id>                  update
+//   DELETE /api/admin/job-postings?id=<id>                  delete
+//   GET    /api/admin/job-postings?id=<id>&applications=1   applications for that posting
+//
+// An EARLIER version of this merge used an optional catch-all route
+// (api/admin/job-postings/[[...params]].ts) to put the id/applications in the path. That silently
+// 404'd on the zero-segment base path (GET/POST list+create) in production: Vercel's plain
+// Serverless Functions routing (outside Next.js) does not match `[[...x]]` at the route root, only
+// at one-or-more segments. Query-string dispatch on a single flat path has no such ambiguity — do
+// not go back to path-segment routing here. The session guard still runs first, before anything
+// else, on every branch.
 
 const VALID_EMPLOYMENT_TYPES = ['Full-time', 'Part-time', 'Contract', 'Internship'];
 const VALID_STATUSES = ['draft', 'open', 'closed'];
@@ -202,30 +210,24 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(500).json({ error: 'Server is not configured' });
   }
 
-  const raw = req.query.params;
-  const segments = Array.isArray(raw) ? raw : raw ? [raw] : [];
+  const id = typeof req.query.id === 'string' ? req.query.id : undefined;
+  const wantsApplications = req.query.applications === '1' || req.query.applications === 'true';
 
-  if (segments.length === 0) {
+  if (!id) {
     if (req.method === 'GET') return listPostings(res, supabase);
     if (req.method === 'POST') return createPosting(req, res, supabase);
     res.setHeader('Allow', 'GET, POST');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  if (segments.length === 1) {
-    const [id] = segments;
-    if (req.method === 'PATCH') return updatePosting(id, req, res, supabase);
-    if (req.method === 'DELETE') return deletePosting(id, res, supabase);
-    res.setHeader('Allow', 'PATCH, DELETE');
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
-  if (segments.length === 2 && segments[1] === 'applications') {
-    const [id] = segments;
+  if (wantsApplications) {
     if (req.method === 'GET') return listApplications(id, res, supabase);
     res.setHeader('Allow', 'GET');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  return res.status(404).json({ error: 'Not found' });
+  if (req.method === 'PATCH') return updatePosting(id, req, res, supabase);
+  if (req.method === 'DELETE') return deletePosting(id, res, supabase);
+  res.setHeader('Allow', 'PATCH, DELETE');
+  return res.status(405).json({ error: 'Method not allowed' });
 }

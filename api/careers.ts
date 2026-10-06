@@ -3,10 +3,15 @@ import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'node:crypto';
 
 // Combines the public careers listing (GET /api/careers) and the application submission
-// (POST /api/careers/apply) into a single Vercel function. Vercel's Hobby plan caps a deployment
-// at 12 serverless functions — these two were previously separate files, split back out here would
-// blow that budget alongside the admin job-postings endpoints. Behaviour is unchanged from before;
-// only the routing is combined.
+// (POST /api/careers/apply, now POST /api/careers) into a single flat function, dispatching on
+// HTTP method rather than a path segment. Vercel's Hobby plan caps a deployment at 12 serverless
+// functions, so these two were merged — but an EARLIER version of this merge used an optional
+// catch-all route (api/careers/[[...action]].ts) to keep /apply as a distinct path, which turned
+// out to silently 404 on the zero-segment base path: Vercel's plain Serverless Functions routing
+// (outside Next.js) does not match `[[...x]]` at the route root, only at one-or-more segments.
+// That broke the public listing in production without any error, because the client's failed-fetch
+// path renders the same empty state as a genuinely-empty postings list. Method-based dispatch on a
+// single flat path has no such ambiguity — do not go back to path-segment routing here.
 
 const RATE_LIMIT_PER_HOUR = 3;
 const MIN_SUBMISSION_MS = 2000;
@@ -62,12 +67,7 @@ function isHoneypotTripped(value: unknown): boolean {
 // GET /api/careers — open postings only, enforced twice: the RLS policy on job_postings already
 // restricts anon/authenticated SELECT to status = 'open', and this filters again explicitly so
 // the intent is obvious from the code, not just the migration.
-async function listPostings(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'GET') {
-    res.setHeader('Allow', 'GET');
-    return res.status(405).json({ status: 'error', message: 'Method not allowed.' });
-  }
-
+async function listPostings(res: VercelResponse) {
   let supabase;
   try {
     supabase = getAnonClient();
@@ -88,8 +88,8 @@ async function listPostings(req: VercelRequest, res: VercelResponse) {
   return res.status(200).json({ postings: data ?? [] });
 }
 
-// POST /api/careers/apply — the CV file itself is already in Supabase Storage by the time this
-// runs (the client uploads directly to the cv-uploads bucket with the anon key — see
+// POST /api/careers — the CV file itself is already in Supabase Storage by the time this runs
+// (the client uploads directly to the cv-uploads bucket with the anon key — see
 // src/utils/careers.ts) — this just validates the submission and records it against a posting.
 // Same anti-spam and rate-limit posture as api/enquiry.ts.
 //
@@ -97,11 +97,6 @@ async function listPostings(req: VercelRequest, res: VercelResponse) {
 // draft/closed posting — the "posting must be open" check below is what actually enforces that,
 // mirroring the DB-level insert policy on job_applications that protects every OTHER caller.
 async function submitApplication(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') {
-    res.setHeader('Allow', 'POST');
-    return res.status(405).json({ status: 'error', message: 'Method not allowed.' });
-  }
-
   let body: ApplyRequestBody;
   try {
     body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
@@ -198,14 +193,8 @@ async function submitApplication(req: VercelRequest, res: VercelResponse) {
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
-  const raw = req.query.action;
-  const segments = Array.isArray(raw) ? raw : raw ? [raw] : [];
-
-  if (segments.length === 0) {
-    return listPostings(req, res);
-  }
-  if (segments.length === 1 && segments[0] === 'apply') {
-    return submitApplication(req, res);
-  }
-  return res.status(404).json({ status: 'error', message: 'Not found.' });
+  if (req.method === 'GET') return listPostings(res);
+  if (req.method === 'POST') return submitApplication(req, res);
+  res.setHeader('Allow', 'GET, POST');
+  return res.status(405).json({ status: 'error', message: 'Method not allowed.' });
 }
