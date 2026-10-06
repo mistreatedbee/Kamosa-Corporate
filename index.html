@@ -14,8 +14,6 @@
       the raw HTML only and never execute JS, so without a static fallback here they see none of
       it and show a broken/empty preview. This is a fixed, site-wide fallback (not per-page);
       Seo.tsx's JS-driven per-page versions still override these for actual visitors' browser tabs.
-      NOTE: og:url and og:image use the current live Vercel URL since the real domain isn't live
-      yet — update both to https://www.kamosa.co.za once the domain is bought and pointed here.
       NOTE: logo2.png is 1734x907 (its actual dimensions) — if it's ever replaced, update
       og:image:width/height to match the new file's real size, not a guessed/ideal size.
     -->
@@ -23,9 +21,9 @@
     <meta property="og:site_name" content="Kamosa (Pty) Ltd" />
     <meta property="og:title" content="Kamosa (Pty) Ltd | Health, Safety, Compliance & Business Solutions" />
     <meta property="og:description" content="Kamosa (Pty) Ltd provides professional health, safety and compliance, business consulting, procurement and training solutions across South Africa." />
-    <meta property="og:url" content="https://kamosa-corporate.vercel.app/" />
-    <meta property="og:image" content="https://kamosa-corporate.vercel.app/logo2.png" />
-    <meta property="og:image:secure_url" content="https://kamosa-corporate.vercel.app/logo2.png" />
+    <meta property="og:url" content="https://www.kamosa.co.za/" />
+    <meta property="og:image" content="https://www.kamosa.co.za/logo2.png" />
+    <meta property="og:image:secure_url" content="https://www.kamosa.co.za/logo2.png" />
     <meta property="og:image:type" content="image/png" />
     <meta property="og:image:width" content="1734" />
     <meta property="og:image:height" content="907" />
@@ -34,7 +32,7 @@
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="Kamosa (Pty) Ltd | Health, Safety, Compliance & Business Solutions" />
     <meta name="twitter:description" content="Kamosa (Pty) Ltd provides professional health, safety and compliance, business consulting, procurement and training solutions across South Africa." />
-    <meta name="twitter:image" content="https://kamosa-corporate.vercel.app/logo2.png" />
+    <meta name="twitter:image" content="https://www.kamosa.co.za/logo2.png" />
     <meta name="twitter:image:alt" content="Kamosa (Pty) Ltd — Health, Safety, Compliance & Business Solutions" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
