@@ -1,6 +1,7 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
 import { createHash } from 'node:crypto';
+import { notifyByEmail } from './_lib/notifyEmail.js';
 
 // Combines the public careers listing (GET /api/careers) and the application submission
 // (POST /api/careers/apply, now POST /api/careers) into a single flat function, dispatching on
@@ -188,6 +189,20 @@ async function submitApplication(req: VercelRequest, res: VercelResponse) {
       .status(500)
       .json({ status: 'error', message: 'We could not submit your application. Please try again or contact us directly.' });
   }
+
+  // No-ops until RESEND_API_KEY is set — see api/_lib/notifyEmail.ts. Never blocks the response;
+  // the application is already durably in Postgres by this point regardless.
+  await notifyByEmail({
+    subject: `New Job Application: ${posting.title}`,
+    lines: [
+      { label: 'Role', value: posting.title },
+      { label: 'Name', value: name },
+      { label: 'Email', value: email },
+      { label: 'Phone', value: phone || '—' },
+      { label: 'Cover message', value: coverMessage || '—' },
+      { label: 'CV', value: cvFileName }
+    ]
+  });
 
   return res.status(200).json({ status: 'sent' });
 }
