@@ -4,10 +4,10 @@ import { BarChart3Icon, BriefcaseIcon, FileTextIcon, InboxIcon, LogOutIcon, Mail
 const NAV_ITEMS = [
   { label: 'Enquiries', to: '/admin', icon: InboxIcon, enabled: true },
   { label: 'Careers', to: '/admin/careers', icon: BriefcaseIcon, enabled: true },
-  { label: 'Reports', to: '', icon: BarChart3Icon, enabled: false },
-  { label: 'Documents', to: '', icon: FileTextIcon, enabled: false },
-  { label: 'Email Templates', to: '', icon: MailIcon, enabled: false },
-  { label: 'Settings', to: '', icon: SettingsIcon, enabled: false }
+  { label: 'Reports', to: '/admin/reports', icon: BarChart3Icon, enabled: true },
+  { label: 'Documents', to: '/admin/documents', icon: FileTextIcon, enabled: true },
+  { label: 'Email Templates', to: '/admin/email-templates', icon: MailIcon, enabled: true },
+  { label: 'Settings', to: '/admin/settings', icon: SettingsIcon, enabled: true }
 ];
 
 /**
@@ -16,8 +16,9 @@ const NAV_ITEMS = [
  * enforced server-side per request by each /api/admin/* endpoint (see api/_lib/adminSession.ts) —
  * this layout has no client-side gate of its own; a page rendering with no data just means the
  * session check on its API call failed and the page should redirect (handled per-page).
- * Enquiries and Careers are real; the rest are placeholders (disabled, "Soon" badge) — there is no
- * page behind them yet, so they must not be real links.
+ * Every item is a real page now. `enabled` stays in the NAV_ITEMS shape (rendering a disabled,
+ * "Soon"-badged row instead of a link) for whenever a future section ships before its page does —
+ * it must never be a real link with nothing behind it.
  */
 export function AdminLayout() {
   const navigate = useNavigate();

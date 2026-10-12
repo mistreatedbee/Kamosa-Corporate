@@ -132,6 +132,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   void detailError; // Non-fatal — see api/quote-request.ts for the same reasoning.
 
   await notifyByEmail({
+    type: 'service_request',
     subject: 'New Service Request',
     lines: [
       { label: 'Name', value: body.name.trim() },

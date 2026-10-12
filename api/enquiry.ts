@@ -141,6 +141,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // No-ops until RESEND_API_KEY is set — see api/_lib/notifyEmail.ts. Never blocks the response;
   // the lead is already durably in Postgres by this point regardless.
   await notifyByEmail({
+    type: 'enquiry',
     subject: 'New Kamosa Website Enquiry',
     lines: [
       { label: 'Name', value: payload.name.trim() },

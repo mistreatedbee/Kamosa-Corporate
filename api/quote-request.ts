@@ -174,6 +174,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     .map(([key, value]) => ({ label: key.replace(/_/g, ' '), value: String(value) }));
 
   await notifyByEmail({
+    type: 'quote_request',
     subject: 'New Quote Request',
     lines: [
       { label: 'Name', value: body.name.trim() },

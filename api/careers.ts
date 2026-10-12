@@ -193,7 +193,9 @@ async function submitApplication(req: VercelRequest, res: VercelResponse) {
   // No-ops until RESEND_API_KEY is set — see api/_lib/notifyEmail.ts. Never blocks the response;
   // the application is already durably in Postgres by this point regardless.
   await notifyByEmail({
+    type: 'job_application',
     subject: `New Job Application: ${posting.title}`,
+    vars: { role: posting.title },
     lines: [
       { label: 'Role', value: posting.title },
       { label: 'Name', value: name },

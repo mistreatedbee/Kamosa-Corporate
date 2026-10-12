@@ -23,6 +23,10 @@ import { NotFound } from './pages/NotFound';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminEnquiries } from './pages/admin/AdminEnquiries';
 import { AdminJobPostings } from './pages/admin/AdminJobPostings';
+import { AdminReports } from './pages/admin/AdminReports';
+import { AdminDocuments } from './pages/admin/AdminDocuments';
+import { AdminEmailTemplates } from './pages/admin/AdminEmailTemplates';
+import { AdminSettings } from './pages/admin/AdminSettings';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -69,6 +73,10 @@ export function App() {
         <Route element={<AdminLayout />}>
           <Route path="/admin" element={<AdminEnquiries />} />
           <Route path="/admin/careers" element={<AdminJobPostings />} />
+          <Route path="/admin/reports" element={<AdminReports />} />
+          <Route path="/admin/documents" element={<AdminDocuments />} />
+          <Route path="/admin/email-templates" element={<AdminEmailTemplates />} />
+          <Route path="/admin/settings" element={<AdminSettings />} />
         </Route>
       </Routes>
     </BrowserRouter>);
