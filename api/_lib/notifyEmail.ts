@@ -13,10 +13,8 @@ interface NotifyParams {
 }
 
 const NOTIFICATION_RECIPIENT = 'info@kamosa.co.za';
-// Resend requires a verified sending domain; until Kamosa verifies kamosa.co.za with Resend, their
-// own sandbox "onboarding@resend.dev" sender works for testing but should be swapped once a real
-// domain is verified. Kept as a constant here so that's a one-line change when it happens.
-const NOTIFICATION_SENDER = 'Kamosa Website <onboarding@resend.dev>';
+// kamosa.co.za is verified with Resend as of 2026-10-12.
+const NOTIFICATION_SENDER = 'Kamosa Website <notifications@kamosa.co.za>';
 
 export async function notifyByEmail(params: NotifyParams): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
