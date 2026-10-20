@@ -220,6 +220,19 @@ async function updateTemplate(type: string, req: VercelRequest, res: VercelRespo
   return res.status(200).json({ template: data });
 }
 
+async function resetTemplate(type: string, res: VercelResponse, supabase: ServiceClient) {
+  if (!Object.keys(DEFAULT_TEMPLATES).includes(type)) {
+    return res.status(400).json({ error: 'Unknown template type' });
+  }
+
+  const { error } = await supabase.from('email_templates').delete().eq('type', type);
+  if (error) {
+    return res.status(500).json({ error: 'Failed to reset template' });
+  }
+
+  return res.status(200).json({ template: { type, ...DEFAULT_TEMPLATES[type], isCustom: false } });
+}
+
 // --- Settings ---
 
 async function getSettings(res: VercelResponse, supabase: ServiceClient) {
@@ -296,7 +309,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!type) return res.status(400).json({ error: 'Missing type' });
       return updateTemplate(type, req, res, supabase);
     }
-    res.setHeader('Allow', 'GET, PATCH');
+    if (req.method === 'DELETE') {
+      if (!type) return res.status(400).json({ error: 'Missing type' });
+      return resetTemplate(type, res, supabase);
+    }
+    res.setHeader('Allow', 'GET, PATCH, DELETE');
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
