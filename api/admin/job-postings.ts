@@ -70,6 +70,7 @@ function toNullableNumber(value: unknown): number | null | undefined {
 
 function toNullableText(value: unknown): string | null | undefined {
   if (value === undefined) return undefined;
+  if (value === null) return null;
   const text = String(value).trim();
   return text || null;
 }
