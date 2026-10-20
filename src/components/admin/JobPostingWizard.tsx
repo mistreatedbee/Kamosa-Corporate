@@ -305,7 +305,12 @@ function StepBasicInfo({ values, set, errors }: StepProps) {
     <div className="grid gap-5 sm:grid-cols-2">
       <div className="sm:col-span-2">
         <label className={labelClass}>Job title *</label>
-        <input type="text" value={values.title} onChange={(e) => set('title', e.target.value)} className={inputClass} />
+        <input
+          type="text"
+          value={values.title}
+          onChange={(e) => set('title', e.target.value)}
+          placeholder="e.g. Site Safety Officer"
+          className={inputClass} />
         {errors?.title ? <p className="mt-1 text-[0.75rem] text-error-600">{errors.title}</p> : null}
       </div>
       <div>
@@ -328,7 +333,12 @@ function StepBasicInfo({ values, set, errors }: StepProps) {
       </div>
       <div>
         <label className={labelClass}>Department</label>
-        <input type="text" value={values.department} onChange={(e) => set('department', e.target.value)} className={inputClass} />
+        <input
+          type="text"
+          value={values.department}
+          onChange={(e) => set('department', e.target.value)}
+          placeholder="e.g. Operations"
+          className={inputClass} />
       </div>
       <div>
         <label className={labelClass}>Number of vacancies</label>
@@ -342,7 +352,12 @@ function StepBasicInfo({ values, set, errors }: StepProps) {
       <div className="sm:col-span-2">
         <label className={labelClass}>Short summary *</label>
         <p className={helpClass}>A one or two sentence overview shown on the job cards.</p>
-        <textarea rows={2} value={values.summary} onChange={(e) => set('summary', e.target.value)} className={inputClass} />
+        <textarea
+          rows={2}
+          value={values.summary}
+          onChange={(e) => set('summary', e.target.value)}
+          placeholder="e.g. We're looking for an experienced Safety Officer to oversee compliance across our Rustenburg site."
+          className={inputClass} />
         {errors?.summary ? <p className="mt-1 text-[0.75rem] text-error-600">{errors.summary}</p> : null}
       </div>
       <div className="sm:col-span-2">
@@ -424,11 +439,11 @@ function StepEmploymentDetails({ values, set, errors }: StepProps) {
           <div className="mt-4 grid gap-4 sm:grid-cols-4">
             <div>
               <label className={labelClass}>Min</label>
-              <input type="number" value={values.salaryMin} onChange={(e) => set('salaryMin', e.target.value)} className={inputClass} />
+              <input type="number" value={values.salaryMin} onChange={(e) => set('salaryMin', e.target.value)} placeholder="e.g. 15000" className={inputClass} />
             </div>
             <div>
               <label className={labelClass}>Max</label>
-              <input type="number" value={values.salaryMax} onChange={(e) => set('salaryMax', e.target.value)} className={inputClass} />
+              <input type="number" value={values.salaryMax} onChange={(e) => set('salaryMax', e.target.value)} placeholder="e.g. 22000" className={inputClass} />
             </div>
             <div>
               <label className={labelClass}>Currency</label>
@@ -570,6 +585,7 @@ function StepApplicationSettings({ values, set, errors }: StepProps) {
               type="email"
               value={values.applicationEmail}
               onChange={(e) => set('applicationEmail', e.target.value)}
+              placeholder="careers@kamosa.co.za"
               className={inputClass} />
             {errors?.applicationEmail ? <p className="mt-1 text-[0.75rem] text-error-600">{errors.applicationEmail}</p> : null}
           </div>
@@ -577,7 +593,12 @@ function StepApplicationSettings({ values, set, errors }: StepProps) {
         {values.applicationMethod === 'external' ? (
           <div className="mt-3 max-w-sm">
             <label className={labelClass}>External application URL</label>
-            <input type="url" value={values.applicationUrl} onChange={(e) => set('applicationUrl', e.target.value)} className={inputClass} />
+            <input
+              type="url"
+              value={values.applicationUrl}
+              onChange={(e) => set('applicationUrl', e.target.value)}
+              placeholder="https://..."
+              className={inputClass} />
             {errors?.applicationUrl ? <p className="mt-1 text-[0.75rem] text-error-600">{errors.applicationUrl}</p> : null}
           </div>
         ) : null}
@@ -626,7 +647,7 @@ function StepApplicationSettings({ values, set, errors }: StepProps) {
                   type="text"
                   value={q.label}
                   onChange={(e) => updateQuestion(index, { label: e.target.value })}
-                  placeholder="Question text"
+                  placeholder="e.g. Do you have a valid driver's license?"
                   className="min-w-[180px] flex-1 rounded-md border border-hairline bg-white px-3 py-1.5 text-[0.8125rem] text-ink-900 focus:border-brand-600 focus:outline-none" />
                 <select
                   value={q.type}
@@ -658,21 +679,37 @@ function StepApplicationSettings({ values, set, errors }: StepProps) {
           rows={2}
           value={values.applicationInstructions}
           onChange={(e) => set('applicationInstructions', e.target.value)}
+          placeholder="e.g. Please mention your earliest available start date in your cover letter."
           className={inputClass} />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
         <div>
           <label className={labelClass}>Recruiter name</label>
-          <input type="text" value={values.recruiterName} onChange={(e) => set('recruiterName', e.target.value)} className={inputClass} />
+          <input
+            type="text"
+            value={values.recruiterName}
+            onChange={(e) => set('recruiterName', e.target.value)}
+            placeholder="e.g. Lovedonia Mmola"
+            className={inputClass} />
         </div>
         <div>
           <label className={labelClass}>Recruiter email</label>
-          <input type="email" value={values.recruiterEmail} onChange={(e) => set('recruiterEmail', e.target.value)} className={inputClass} />
+          <input
+            type="email"
+            value={values.recruiterEmail}
+            onChange={(e) => set('recruiterEmail', e.target.value)}
+            placeholder="info@kamosa.co.za"
+            className={inputClass} />
         </div>
         <div>
           <label className={labelClass}>Recruiter phone</label>
-          <input type="tel" value={values.recruiterPhone} onChange={(e) => set('recruiterPhone', e.target.value)} className={inputClass} />
+          <input
+            type="tel"
+            value={values.recruiterPhone}
+            onChange={(e) => set('recruiterPhone', e.target.value)}
+            placeholder="071 191 4744"
+            className={inputClass} />
         </div>
       </div>
     </div>

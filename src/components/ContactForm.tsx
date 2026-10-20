@@ -93,6 +93,7 @@ export function ContactForm() {
             type="text"
             autoComplete="name"
             required
+            placeholder="e.g. Thabo Nkosi"
             value={values.name}
             onChange={update('name')}
             aria-invalid={Boolean(errors.name)}
@@ -111,6 +112,7 @@ export function ContactForm() {
             name="company"
             type="text"
             autoComplete="organization"
+            placeholder="e.g. Acme Mining (Pty) Ltd"
             value={values.company}
             onChange={update('company')}
             className={`mt-2 ${fieldClass}`} />
@@ -127,6 +129,7 @@ export function ContactForm() {
             type="email"
             autoComplete="email"
             required
+            placeholder="you@company.co.za"
             value={values.email}
             onChange={update('email')}
             aria-invalid={Boolean(errors.email)}
@@ -145,6 +148,7 @@ export function ContactForm() {
             name="phone"
             type="tel"
             autoComplete="tel"
+            placeholder="082 123 4567"
             value={values.phone}
             onChange={update('phone')}
             aria-invalid={Boolean(errors.phone)}
@@ -189,6 +193,7 @@ export function ContactForm() {
             name="message"
             rows={5}
             required
+            placeholder="e.g. We need a site safety audit for our Rustenburg plant, ideally within the next month."
             value={values.message}
             onChange={update('message')}
             aria-invalid={Boolean(errors.message)}

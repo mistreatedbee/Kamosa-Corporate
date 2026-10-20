@@ -120,6 +120,7 @@ export function JobApplicationForm({ posting }: JobApplicationFormProps) {
             id={`${idPrefix}-name`}
             type="text"
             autoComplete="name"
+            placeholder="e.g. Thabo Nkosi"
             value={values.name}
             onChange={update('name')}
             aria-invalid={Boolean(errors.name)}
@@ -135,6 +136,7 @@ export function JobApplicationForm({ posting }: JobApplicationFormProps) {
             id={`${idPrefix}-email`}
             type="email"
             autoComplete="email"
+            placeholder="you@example.com"
             value={values.email}
             onChange={update('email')}
             aria-invalid={Boolean(errors.email)}
@@ -150,6 +152,7 @@ export function JobApplicationForm({ posting }: JobApplicationFormProps) {
             id={`${idPrefix}-phone`}
             type="tel"
             autoComplete="tel"
+            placeholder="082 123 4567"
             value={values.phone}
             onChange={update('phone')}
             aria-invalid={Boolean(errors.phone)}
@@ -240,6 +243,7 @@ export function JobApplicationForm({ posting }: JobApplicationFormProps) {
               <input
                 id={`${idPrefix}-q-${q.id}`}
                 type="text"
+                placeholder="Your answer"
                 value={answerValues[q.id] ?? ''}
                 onChange={(event) => setAnswerValues((prev) => ({ ...prev, [q.id]: event.target.value }))}
                 className={`mt-2 ${fieldClass}`} />

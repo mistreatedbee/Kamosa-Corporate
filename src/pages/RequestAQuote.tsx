@@ -225,13 +225,14 @@ export function RequestAQuote() {
                         <Field label="Site / project type" required error={errors.siteType?.message}>
                           <input
                             className={inputClass(Boolean(errors.siteType))}
+                            placeholder="e.g. Underground mine, construction site, warehouse"
                             {...register('siteType', { required: 'Please tell us the site or project type.' })} />
                         </Field>
                         <Field label="General location (province/city)">
-                          <input className={inputClass(false)} {...register('hsLocation')} />
+                          <input className={inputClass(false)} placeholder="e.g. Rustenburg, North West" {...register('hsLocation')} />
                         </Field>
                         <Field label="Approximate worker count">
-                          <input className={inputClass(false)} {...register('workerCount')} />
+                          <input className={inputClass(false)} placeholder="e.g. 50" {...register('workerCount')} />
                         </Field>
                         <Field label="Duration">
                           <input className={inputClass(false)} placeholder="e.g. 3 months" {...register('duration')} />
@@ -240,7 +241,7 @@ export function RequestAQuote() {
                           <input className={inputClass(false)} placeholder="e.g. safety file, HIRA, tender pack" {...register('docsNeeded')} />
                         </Field>
                         <Field label="Current compliance status" className="sm:col-span-2">
-                          <input className={inputClass(false)} {...register('complianceStatus')} />
+                          <input className={inputClass(false)} placeholder="e.g. No formal safety file yet" {...register('complianceStatus')} />
                         </Field>
                       </>
                     ) : null}
@@ -250,21 +251,23 @@ export function RequestAQuote() {
                         <Field label="Course of interest" required error={errors.course?.message}>
                           <input
                             className={inputClass(Boolean(errors.course))}
+                            placeholder="e.g. SAMTRAC, First Aid Level 2, HIRA"
                             {...register('course', { required: 'Please tell us which course.' })} />
                         </Field>
                         <Field label="Approximate participant count" required error={errors.participantCount?.message}>
                           <input
                             className={inputClass(Boolean(errors.participantCount))}
+                            placeholder="e.g. 15"
                             {...register('participantCount', { required: 'Please give an approximate participant count.' })} />
                         </Field>
                         <Field label="Preferred date">
                           <input type="date" className={inputClass(false)} {...register('preferredDate')} />
                         </Field>
                         <Field label="Location">
-                          <input className={inputClass(false)} {...register('trainingLocation')} />
+                          <input className={inputClass(false)} placeholder="e.g. On-site in Polokwane" {...register('trainingLocation')} />
                         </Field>
                         <Field label="Organisation type" className="sm:col-span-2">
-                          <input className={inputClass(false)} {...register('organisationType')} />
+                          <input className={inputClass(false)} placeholder="e.g. Mining contractor, logistics company" {...register('organisationType')} />
                         </Field>
                       </>
                     ) : null}
@@ -280,10 +283,11 @@ export function RequestAQuote() {
                         <Field label="Approximate quantity" required error={errors.quantity?.message}>
                           <input
                             className={inputClass(Boolean(errors.quantity))}
+                            placeholder="e.g. 200 units"
                             {...register('quantity', { required: 'Please give an approximate quantity.' })} />
                         </Field>
                         <Field label="Delivery location">
-                          <input className={inputClass(false)} {...register('deliveryLocation')} />
+                          <input className={inputClass(false)} placeholder="e.g. Johannesburg warehouse" {...register('deliveryLocation')} />
                         </Field>
                         <Field label="Needed by">
                           <input type="date" className={inputClass(false)} {...register('neededBy')} />
@@ -295,6 +299,7 @@ export function RequestAQuote() {
                       <Field label="What are you looking to achieve?" required error={errors.freeText?.message} className="sm:col-span-2">
                         <textarea
                           rows={5}
+                          placeholder="e.g. We're opening a new site and need guidance on compliance requirements before we start operations."
                           className={`resize-y ${inputClass(Boolean(errors.freeText))}`}
                           {...register('freeText', { required: 'Please tell us what you are looking to achieve.' })} />
                       </Field>
@@ -322,17 +327,23 @@ export function RequestAQuote() {
                   <div className="mt-8 grid gap-6 sm:grid-cols-2">
                     <Field label="Name" required error={errors.name?.message}>
                       <input
+                        autoComplete="name"
+                        placeholder="e.g. Thabo Nkosi"
                         className={inputClass(Boolean(errors.name))}
                         {...register('name', { required: 'Please enter your name.' })} />
                     </Field>
                     <Field label="Company / Organisation" required error={errors.company?.message}>
                       <input
+                        autoComplete="organization"
+                        placeholder="e.g. Acme Mining (Pty) Ltd"
                         className={inputClass(Boolean(errors.company))}
                         {...register('company', { required: 'Please enter your company or organisation.' })} />
                     </Field>
                     <Field label="Email" required error={errors.email?.message}>
                       <input
                         type="email"
+                        autoComplete="email"
+                        placeholder="you@company.co.za"
                         className={inputClass(Boolean(errors.email))}
                         {...register('email', {
                           required: 'Please enter your email address.',
@@ -342,6 +353,8 @@ export function RequestAQuote() {
                     <Field label="Phone" required error={errors.phone?.message}>
                       <input
                         type="tel"
+                        autoComplete="tel"
+                        placeholder="082 123 4567"
                         className={inputClass(Boolean(errors.phone))}
                         {...register('phone', { required: 'Please enter your phone number.' })} />
                     </Field>

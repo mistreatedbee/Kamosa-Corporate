@@ -77,6 +77,7 @@ export function RequestService() {
                     type="text"
                     autoComplete="name"
                     required
+                    placeholder="e.g. Thabo Nkosi"
                     value={values.name}
                     onChange={update('name')}
                     aria-invalid={Boolean(errors.name)}
@@ -95,6 +96,7 @@ export function RequestService() {
                     type="email"
                     autoComplete="email"
                     required
+                    placeholder="you@company.co.za"
                     value={values.email}
                     onChange={update('email')}
                     aria-invalid={Boolean(errors.email)}
@@ -112,6 +114,7 @@ export function RequestService() {
                     name="phone"
                     type="tel"
                     autoComplete="tel"
+                    placeholder="082 123 4567"
                     value={values.phone}
                     onChange={update('phone')}
                     aria-invalid={Boolean(errors.phone)}
@@ -153,6 +156,7 @@ export function RequestService() {
                     name="description"
                     rows={5}
                     required
+                    placeholder="e.g. We need PPE supplied for a 40-person construction crew by the end of the month."
                     value={values.description}
                     onChange={update('description')}
                     aria-invalid={Boolean(errors.description)}
