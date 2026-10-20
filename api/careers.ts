@@ -4,20 +4,31 @@ import { createHash } from 'node:crypto';
 import { notifyByEmail } from './_lib/notifyEmail.js';
 
 // Combines the public careers listing (GET /api/careers) and the application submission
-// (POST /api/careers/apply, now POST /api/careers) into a single flat function, dispatching on
-// HTTP method rather than a path segment. Vercel's Hobby plan caps a deployment at 12 serverless
-// functions, so these two were merged — but an EARLIER version of this merge used an optional
-// catch-all route (api/careers/[[...action]].ts) to keep /apply as a distinct path, which turned
-// out to silently 404 on the zero-segment base path: Vercel's plain Serverless Functions routing
-// (outside Next.js) does not match `[[...x]]` at the route root, only at one-or-more segments.
-// That broke the public listing in production without any error, because the client's failed-fetch
-// path renders the same empty state as a genuinely-empty postings list. Method-based dispatch on a
-// single flat path has no such ambiguity — do not go back to path-segment routing here.
+// (POST /api/careers) into a single flat function, dispatching on HTTP method rather than a path
+// segment. Vercel's Hobby plan caps a deployment at 12 serverless functions, so these two were
+// merged — but an EARLIER version of this merge used an optional catch-all route to keep /apply as
+// a distinct path, which turned out to silently 404 on the zero-segment base path: Vercel's plain
+// Serverless Functions routing (outside Next.js) does not match `[[...x]]` at the route root, only
+// at one-or-more segments. Method-based dispatch on a single flat path has no such ambiguity — do
+// not go back to path-segment routing here.
 
 const RATE_LIMIT_PER_HOUR = 3;
 const MIN_SUBMISSION_MS = 2000;
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const VALID_DOCUMENT_TYPES = ['cv', 'cover_letter', 'certificates', 'portfolio', 'other'];
+
+interface DocumentUpload {
+  type: string;
+  storagePath: string;
+  fileName: string;
+}
+
+interface AnswerSubmission {
+  questionId: string;
+  label: string;
+  answer: string;
+}
 
 interface ApplyRequestBody {
   jobPostingId?: string;
@@ -27,6 +38,9 @@ interface ApplyRequestBody {
   coverMessage?: string;
   cvStoragePath?: string;
   cvFileName?: string;
+  documents?: DocumentUpload[];
+  answers?: AnswerSubmission[];
+  consent?: boolean;
   website?: string; // honeypot
   formRenderedAt?: number;
 }
@@ -65,9 +79,12 @@ function isHoneypotTripped(value: unknown): boolean {
   return value.trim().length > 0;
 }
 
-// GET /api/careers — open postings only, enforced twice: the RLS policy on job_postings already
-// restricts anon/authenticated SELECT to status = 'open', and this filters again explicitly so
-// the intent is obvious from the code, not just the migration.
+// GET /api/careers — open postings only, within their application window, enforced three ways:
+// the RLS policy on job_postings already restricts anon/authenticated SELECT to status = 'open',
+// this filters again explicitly on status AND the opens_at/closing_date window, and salary fields
+// are stripped server-side (not just hidden client-side) when the posting hasn't marked them public
+// — the API response itself must never leak a non-public salary, regardless of what the UI does
+// with it.
 async function listPostings(res: VercelResponse) {
   let supabase;
   try {
@@ -76,22 +93,34 @@ async function listPostings(res: VercelResponse) {
     return res.status(500).json({ status: 'error', message: 'Server is not configured' });
   }
 
+  const today = new Date().toISOString().slice(0, 10);
+
   const { data, error } = await supabase
     .from('job_postings')
-    .select('id, title, department, location, employment_type, summary, requirements, responsibilities, closing_date, created_at')
+    .select('*')
     .eq('status', 'open')
+    .or(`opens_at.is.null,opens_at.lte.${today}`)
+    .or(`closing_date.is.null,closing_date.gte.${today}`)
     .order('created_at', { ascending: false });
 
   if (error) {
     return res.status(500).json({ status: 'error', message: 'Failed to load job postings' });
   }
 
-  return res.status(200).json({ postings: data ?? [] });
+  const postings = (data ?? []).map((posting) => {
+    if (!posting.salary_public) {
+      return { ...posting, salary_min: null, salary_max: null, salary_frequency: null };
+    }
+    return posting;
+  });
+
+  return res.status(200).json({ postings });
 }
 
-// POST /api/careers — the CV file itself is already in Supabase Storage by the time this runs
-// (the client uploads directly to the cv-uploads bucket with the anon key — see
-// src/utils/careers.ts) — this just validates the submission and records it against a posting.
+// POST /api/careers — document files are already in Supabase Storage by the time this runs (the
+// client uploads directly to the cv-uploads bucket with the anon key — see src/utils/careers.ts) —
+// this validates the submission (including that every document the posting requires was actually
+// attached, and every required screening question was answered) and records it against a posting.
 // Same anti-spam and rate-limit posture as api/enquiry.ts.
 //
 // This function uses the service role, so RLS wouldn't stop it from inserting against a
@@ -123,6 +152,8 @@ async function submitApplication(req: VercelRequest, res: VercelResponse) {
   const coverMessage = String(body?.coverMessage ?? '').trim();
   const cvStoragePath = String(body?.cvStoragePath ?? '');
   const cvFileName = String(body?.cvFileName ?? '').trim();
+  const documents = Array.isArray(body?.documents) ? body.documents : [];
+  const answers = Array.isArray(body?.answers) ? body.answers : [];
 
   if (!UUID_RE.test(jobPostingId)) {
     return res.status(400).json({ status: 'error', message: 'Invalid job posting.' });
@@ -136,6 +167,14 @@ async function submitApplication(req: VercelRequest, res: VercelResponse) {
   if (!cvStoragePath || !cvFileName || !cvStoragePath.startsWith(`${jobPostingId}/`)) {
     return res.status(400).json({ status: 'error', message: 'Please attach your CV and try again.' });
   }
+  if (!body?.consent) {
+    return res.status(400).json({ status: 'error', message: 'Please confirm you agree to the privacy notice.' });
+  }
+  for (const doc of documents) {
+    if (!VALID_DOCUMENT_TYPES.includes(doc.type) || !doc.storagePath?.startsWith(`${jobPostingId}/`) || !doc.fileName) {
+      return res.status(400).json({ status: 'error', message: 'One of the attached documents is invalid. Please try again.' });
+    }
+  }
 
   let supabase;
   try {
@@ -148,12 +187,26 @@ async function submitApplication(req: VercelRequest, res: VercelResponse) {
 
   const { data: posting, error: postingError } = await supabase
     .from('job_postings')
-    .select('id, title, status')
+    .select('id, title, status, required_documents, screening_questions')
     .eq('id', jobPostingId)
     .single();
 
   if (postingError || !posting || posting.status !== 'open') {
     return res.status(400).json({ status: 'error', message: 'This role is no longer accepting applications.' });
+  }
+
+  const requiredDocs: string[] = posting.required_documents ?? ['cv'];
+  const attachedTypes = new Set(['cv', ...documents.map((d) => d.type)]);
+  const missingDoc = requiredDocs.find((docType) => !attachedTypes.has(docType));
+  if (missingDoc) {
+    return res.status(400).json({ status: 'error', message: `Please attach the required document: ${missingDoc.replace('_', ' ')}.` });
+  }
+
+  const questions: Array<{ id: string; label: string; required: boolean }> = posting.screening_questions ?? [];
+  const answeredIds = new Set(answers.map((a) => a.questionId));
+  const missingAnswer = questions.find((q) => q.required && !answeredIds.has(q.id));
+  if (missingAnswer) {
+    return res.status(400).json({ status: 'error', message: `Please answer: ${missingAnswer.label}` });
   }
 
   const ip = getClientIp(req);
@@ -172,19 +225,26 @@ async function submitApplication(req: VercelRequest, res: VercelResponse) {
       .json({ status: 'error', message: 'Too many applications submitted recently. Please try again later.' });
   }
 
-  const { error: insertError } = await supabase.from('job_applications').insert({
-    job_posting_id: jobPostingId,
-    status: 'New',
-    name,
-    email,
-    phone: phone || null,
-    cover_message: coverMessage || null,
-    cv_storage_path: cvStoragePath,
-    cv_file_name: cvFileName,
-    ip_hash: ipHash
-  });
+  const { data: inserted, error: insertError } = await supabase
+    .from('job_applications')
+    .insert({
+      job_posting_id: jobPostingId,
+      status: 'New',
+      name,
+      email,
+      phone: phone || null,
+      cover_message: coverMessage || null,
+      cv_storage_path: cvStoragePath,
+      cv_file_name: cvFileName,
+      documents,
+      answers,
+      consent_at: new Date().toISOString(),
+      ip_hash: ipHash
+    })
+    .select('reference_code')
+    .single();
 
-  if (insertError) {
+  if (insertError || !inserted) {
     return res
       .status(500)
       .json({ status: 'error', message: 'We could not submit your application. Please try again or contact us directly.' });
@@ -206,7 +266,7 @@ async function submitApplication(req: VercelRequest, res: VercelResponse) {
     ]
   });
 
-  return res.status(200).json({ status: 'sent' });
+  return res.status(200).json({ status: 'sent', referenceCode: inserted.reference_code });
 }
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {

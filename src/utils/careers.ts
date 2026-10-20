@@ -1,17 +1,7 @@
 import { supabase } from '../lib/supabaseClient';
+import type { DocumentType, JobPosting } from '../types/careers';
 
-export interface JobPosting {
-  id: string;
-  title: string;
-  department: string | null;
-  location: string;
-  employment_type: string;
-  summary: string;
-  requirements: string[];
-  responsibilities: string[];
-  closing_date: string | null;
-  created_at: string;
-}
+export type { JobPosting };
 
 export interface ApplicationPayload {
   name: string;
@@ -20,12 +10,18 @@ export interface ApplicationPayload {
   coverMessage: string;
 }
 
+export interface ScreeningAnswer {
+  questionId: string;
+  label: string;
+  answer: string;
+}
+
 export type ApplicationResult =
-  | { status: 'sent' }
+  | { status: 'sent'; referenceCode?: string }
   | { status: 'error'; message: string };
 
-const MAX_CV_BYTES = 5 * 1024 * 1024;
-const ALLOWED_CV_TYPES = [
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_DOCUMENT_TYPES = [
   'application/pdf',
   'application/msword',
   'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
@@ -33,9 +29,12 @@ const ALLOWED_CV_TYPES = [
 
 export function validateApplication(
   payload: ApplicationPayload,
-  cvFile: File | null
-): Partial<Record<keyof ApplicationPayload | 'cv', string>> {
-  const errors: Partial<Record<keyof ApplicationPayload | 'cv', string>> = {};
+  cvFile: File | null,
+  extraDocuments: Partial<Record<DocumentType, File | null>> = {},
+  requiredDocuments: DocumentType[] = ['cv'],
+  consent = false
+): Partial<Record<keyof ApplicationPayload | 'cv' | 'consent' | DocumentType, string>> {
+  const errors: Partial<Record<keyof ApplicationPayload | 'cv' | 'consent' | DocumentType, string>> = {};
 
   if (!payload.name.trim()) errors.name = 'Please enter your name.';
   if (!payload.email.trim()) {
@@ -49,11 +48,25 @@ export function validateApplication(
 
   if (!cvFile) {
     errors.cv = 'Please attach your CV.';
-  } else if (!ALLOWED_CV_TYPES.includes(cvFile.type)) {
+  } else if (!ALLOWED_DOCUMENT_TYPES.includes(cvFile.type)) {
     errors.cv = 'CV must be a PDF or Word document.';
-  } else if (cvFile.size > MAX_CV_BYTES) {
+  } else if (cvFile.size > MAX_FILE_BYTES) {
     errors.cv = 'CV must be 5MB or smaller.';
   }
+
+  for (const docType of requiredDocuments) {
+    if (docType === 'cv') continue;
+    const file = extraDocuments[docType];
+    if (!file) {
+      errors[docType] = 'This document is required.';
+    } else if (!ALLOWED_DOCUMENT_TYPES.includes(file.type)) {
+      errors[docType] = 'Must be a PDF or Word document.';
+    } else if (file.size > MAX_FILE_BYTES) {
+      errors[docType] = 'Must be 5MB or smaller.';
+    }
+  }
+
+  if (!consent) errors.consent = 'Please confirm you agree to the privacy notice.';
 
   return errors;
 }
@@ -69,25 +82,43 @@ function sanitizeFileName(name: string) {
   return name.replace(/[^a-zA-Z0-9.\-_]/g, '_');
 }
 
+async function uploadDocument(jobPostingId: string, file: File): Promise<{ storagePath: string; fileName: string } | null> {
+  if (!supabase) return null;
+  const storagePath = `${jobPostingId}/${Date.now()}-${sanitizeFileName(file.name)}`;
+  const { error } = await supabase.storage.from('cv-uploads').upload(storagePath, file, {
+    contentType: file.type,
+    upsert: false
+  });
+  if (error) return null;
+  return { storagePath, fileName: file.name };
+}
+
 export async function submitApplication(
   jobPostingId: string,
   payload: ApplicationPayload,
   cvFile: File,
+  extraDocuments: Partial<Record<DocumentType, File>>,
+  answers: ScreeningAnswer[],
+  consent: boolean,
   antiSpam: { website: string; formRenderedAt: number }
 ): Promise<ApplicationResult> {
   if (!supabase) {
     return { status: 'error', message: 'Applications are temporarily unavailable. Please try again later.' };
   }
 
-  const storagePath = `${jobPostingId}/${Date.now()}-${sanitizeFileName(cvFile.name)}`;
-
-  const { error: uploadError } = await supabase.storage.from('cv-uploads').upload(storagePath, cvFile, {
-    contentType: cvFile.type,
-    upsert: false
-  });
-
-  if (uploadError) {
+  const cvUpload = await uploadDocument(jobPostingId, cvFile);
+  if (!cvUpload) {
     return { status: 'error', message: 'We could not upload your CV. Please try again.' };
+  }
+
+  const documents: Array<{ type: DocumentType; storagePath: string; fileName: string }> = [];
+  for (const [type, file] of Object.entries(extraDocuments) as Array<[DocumentType, File | undefined]>) {
+    if (!file) continue;
+    const uploaded = await uploadDocument(jobPostingId, file);
+    if (!uploaded) {
+      return { status: 'error', message: `We could not upload your ${type.replace('_', ' ')}. Please try again.` };
+    }
+    documents.push({ type, ...uploaded });
   }
 
   try {
@@ -100,8 +131,11 @@ export async function submitApplication(
         email: payload.email,
         phone: payload.phone,
         coverMessage: payload.coverMessage,
-        cvStoragePath: storagePath,
-        cvFileName: cvFile.name,
+        cvStoragePath: cvUpload.storagePath,
+        cvFileName: cvUpload.fileName,
+        documents,
+        answers,
+        consent,
         ...antiSpam
       })
     });
@@ -118,7 +152,7 @@ export async function submitApplication(
       };
     }
 
-    return { status: 'sent' };
+    return { status: 'sent', referenceCode: data?.referenceCode };
   } catch {
     return { status: 'error', message: 'A network error prevented submission. Please try again or contact us directly.' };
   }

@@ -14,6 +14,7 @@ import { Credentials } from './pages/Credentials';
 import { Contact } from './pages/Contact';
 import { Faq } from './pages/Faq';
 import { Careers } from './pages/Careers';
+import { CareerDetail } from './pages/CareerDetail';
 import { RequestAQuote } from './pages/RequestAQuote';
 import { RequestService } from './pages/RequestService';
 import { EnvironmentalManagement } from './pages/EnvironmentalManagement';
@@ -54,6 +55,7 @@ export function App() {
           <Route path="/contact" element={<Contact />} />
           <Route path="/faq" element={<Faq />} />
           <Route path="/careers" element={<Careers />} />
+          <Route path="/careers/:id" element={<CareerDetail />} />
           <Route path="/request-a-quote" element={<RequestAQuote />} />
           <Route path="/request-service" element={<RequestService />} />
           {/* Canonical per docs/DECISIONS.md Decision 2 — consistent with the other four

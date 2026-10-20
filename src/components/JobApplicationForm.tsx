@@ -1,7 +1,14 @@
-import React, { useRef, useState } from 'react';
+import { useRef, useState, type ChangeEvent, type FormEvent, type ReactNode } from 'react';
 import { AlertCircleIcon, CheckCircle2Icon, Loader2Icon, PaperclipIcon, type LucideIcon } from 'lucide-react';
 import { Button } from './Button';
-import { submitApplication, validateApplication, type ApplicationPayload, type ApplicationResult } from '../utils/careers';
+import {
+  submitApplication,
+  validateApplication,
+  type ApplicationPayload,
+  type ApplicationResult,
+  type ScreeningAnswer
+} from '../utils/careers';
+import { DOCUMENT_TYPE_LABELS, type DocumentType, type JobPosting } from '../types/careers';
 
 const EMPTY: ApplicationPayload = { name: '', email: '', phone: '', coverMessage: '' };
 
@@ -11,14 +18,16 @@ const errorFieldClass = 'border-error-600 hover:border-error-600';
 const labelClass = 'block font-display text-[0.8125rem] font-semibold text-ink-900';
 
 interface JobApplicationFormProps {
-  jobPostingId: string;
-  jobTitle: string;
+  posting: JobPosting;
 }
 
-export function JobApplicationForm({ jobPostingId, jobTitle }: JobApplicationFormProps) {
+export function JobApplicationForm({ posting }: JobApplicationFormProps) {
   const [values, setValues] = useState<ApplicationPayload>(EMPTY);
   const [cvFile, setCvFile] = useState<File | null>(null);
-  const [errors, setErrors] = useState<Partial<Record<keyof ApplicationPayload | 'cv', string>>>({});
+  const [extraDocuments, setExtraDocuments] = useState<Partial<Record<DocumentType, File>>>({});
+  const [answerValues, setAnswerValues] = useState<Record<string, string>>({});
+  const [consent, setConsent] = useState(false);
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<ApplicationResult | null>(null);
   const [honeypot, setHoneypot] = useState('');
@@ -26,47 +35,70 @@ export function JobApplicationForm({ jobPostingId, jobTitle }: JobApplicationFor
   const fileInputRef = useRef<HTMLInputElement>(null);
   const formRenderedAt = useRef(Date.now());
 
-  const update = (key: keyof ApplicationPayload) => (
-    event: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
+  const update = (key: keyof ApplicationPayload) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setValues((prev) => ({ ...prev, [key]: event.target.value }));
     if (errors[key]) setErrors((prev) => ({ ...prev, [key]: undefined }));
   };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     setCvFile(event.target.files?.[0] ?? null);
     if (errors.cv) setErrors((prev) => ({ ...prev, cv: undefined }));
   };
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleExtraDocChange = (docType: DocumentType) => (event: ChangeEvent<HTMLInputElement>) => {
+    setExtraDocuments((prev) => ({ ...prev, [docType]: event.target.files?.[0] }));
+    if (errors[docType]) setErrors((prev) => ({ ...prev, [docType]: undefined }));
+  };
+
+  const extraDocTypes = posting.required_documents.filter((d) => d !== 'cv');
+
+  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setResult(null);
 
-    const nextErrors = validateApplication(values, cvFile);
+    const nextErrors = validateApplication(values, cvFile, extraDocuments, posting.required_documents, consent);
+
+    const answers: ScreeningAnswer[] = [];
+    for (const q of posting.screening_questions) {
+      const answer = (answerValues[q.id] ?? '').trim();
+      if (q.required && !answer) {
+        nextErrors[`question_${q.id}` as keyof typeof nextErrors] = 'This question is required.';
+      }
+      if (answer) answers.push({ questionId: q.id, label: q.label, answer });
+    }
+
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) return;
 
     setSubmitting(true);
-    const outcome = await submitApplication(jobPostingId, values, cvFile as File, {
-      website: honeypot,
-      formRenderedAt: formRenderedAt.current
-    });
+    const outcome = await submitApplication(
+      posting.id,
+      values,
+      cvFile as File,
+      extraDocuments,
+      answers,
+      consent,
+      { website: honeypot, formRenderedAt: formRenderedAt.current }
+    );
     setSubmitting(false);
     setResult(outcome);
 
     if (outcome.status === 'sent') {
       setValues(EMPTY);
       setCvFile(null);
+      setExtraDocuments({});
+      setAnswerValues({});
+      setConsent(false);
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
     requestAnimationFrame(() => statusRef.current?.focus());
   };
 
-  const idPrefix = `apply-${jobPostingId}`;
+  const idPrefix = `apply-${posting.id}`;
 
   return (
     <form onSubmit={handleSubmit} noValidate className="border-t border-hairline bg-cream/50 p-6 sm:p-8">
-      <h3 className="font-display text-base font-bold text-ink-900">Apply for {jobTitle}</h3>
+      <h3 className="font-display text-base font-bold text-ink-900">Apply for {posting.title}</h3>
 
       <div aria-hidden="true" className="absolute left-[-9999px] top-auto h-0 w-0 overflow-hidden">
         <label htmlFor={`${idPrefix}-website`}>Website</label>
@@ -150,6 +182,28 @@ export function JobApplicationForm({ jobPostingId, jobTitle }: JobApplicationFor
           <FieldError message={errors.cv} />
         </div>
 
+        {extraDocTypes.map((docType) => (
+          <div key={docType}>
+            <label htmlFor={`${idPrefix}-${docType}`} className={labelClass}>
+              {DOCUMENT_TYPE_LABELS[docType]} <span className="text-gold">*</span>
+            </label>
+            <input
+              id={`${idPrefix}-${docType}`}
+              type="file"
+              accept=".pdf,.doc,.docx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+              onChange={handleExtraDocChange(docType)}
+              aria-invalid={Boolean(errors[docType])}
+              className="mt-2 block w-full cursor-pointer rounded-sm border border-hairline bg-white px-4 py-3 text-[0.875rem] text-ink-900 file:mr-3 file:rounded-sm file:border-0 file:bg-ink-900 file:px-3 file:py-1.5 file:text-[0.8125rem] file:font-semibold file:text-white hover:border-muted/50" />
+            {extraDocuments[docType] ? (
+              <p className="mt-1.5 flex items-center gap-1.5 text-[0.75rem] text-muted">
+                <PaperclipIcon className="h-3 w-3" aria-hidden={true} />
+                {extraDocuments[docType]?.name}
+              </p>
+            ) : null}
+            <FieldError message={errors[docType]} />
+          </div>
+        ))}
+
         <div className="sm:col-span-2">
           <label htmlFor={`${idPrefix}-message`} className={labelClass}>
             Cover message
@@ -162,7 +216,54 @@ export function JobApplicationForm({ jobPostingId, jobTitle }: JobApplicationFor
             placeholder="Tell us why you'd be a good fit (optional)."
             className={`mt-2 resize-y ${fieldClass}`} />
         </div>
+
+        {posting.screening_questions.map((q) => (
+          <div key={q.id} className="sm:col-span-2">
+            <label htmlFor={`${idPrefix}-q-${q.id}`} className={labelClass}>
+              {q.label} {q.required ? <span className="text-gold">*</span> : null}
+            </label>
+            {q.type === 'yesno' ? (
+              <div className="mt-2 flex gap-5">
+                {['Yes', 'No'].map((option) => (
+                  <label key={option} className="flex items-center gap-2 text-[0.9375rem] text-ink-900">
+                    <input
+                      type="radio"
+                      name={`${idPrefix}-q-${q.id}`}
+                      checked={answerValues[q.id] === option}
+                      onChange={() => setAnswerValues((prev) => ({ ...prev, [q.id]: option }))}
+                    />
+                    {option}
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <input
+                id={`${idPrefix}-q-${q.id}`}
+                type="text"
+                value={answerValues[q.id] ?? ''}
+                onChange={(event) => setAnswerValues((prev) => ({ ...prev, [q.id]: event.target.value }))}
+                className={`mt-2 ${fieldClass}`} />
+            )}
+            <FieldError message={errors[`question_${q.id}`]} />
+          </div>
+        ))}
       </div>
+
+      <div className="mt-6 flex items-start gap-2.5">
+        <input
+          id={`${idPrefix}-consent`}
+          type="checkbox"
+          checked={consent}
+          onChange={(event) => {
+            setConsent(event.target.checked);
+            if (errors.consent) setErrors((prev) => ({ ...prev, consent: undefined }));
+          }}
+          className="mt-0.5" />
+        <label htmlFor={`${idPrefix}-consent`} className="text-[0.8125rem] leading-snug text-ink-900">
+          I agree to Kamosa's <a href="/privacy" target="_blank" rel="noreferrer" className="text-brand-600 underline">privacy notice</a> and consent to my information being processed for this application.
+        </label>
+      </div>
+      <FieldError message={errors.consent} />
 
       <div className="mt-6">
         <Button type="submit" variant="primary" withArrow={!submitting} disabled={submitting}>
@@ -180,7 +281,13 @@ export function JobApplicationForm({ jobPostingId, jobTitle }: JobApplicationFor
       <div ref={statusRef} tabIndex={-1} role="status" aria-live="polite" className={result ? 'mt-6' : 'sr-only'}>
         {result?.status === 'sent' ? (
           <Notice tone="success" icon={CheckCircle2Icon}>
-            Thank you. Your application has been received. The Kamosa team will be in touch.
+            Thank you. Your application for <strong>{posting.title}</strong> has been received.
+            {result.referenceCode ? (
+              <>
+                {' '}Your reference number is <strong>{result.referenceCode}</strong> — please keep it for your records.
+              </>
+            ) : null}{' '}
+            The Kamosa team will be in touch.
           </Notice>
         ) : null}
         {result?.status === 'error' ? (
@@ -206,7 +313,7 @@ function FieldError({ message }: { message?: string }) {
 interface NoticeProps {
   tone: 'success' | 'error';
   icon: LucideIcon;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 const noticeTones: Record<NoticeProps['tone'], string> = {

@@ -14,7 +14,8 @@ const TYPE_LABELS: Record<string, string> = {
   enquiry: 'Contact form enquiry',
   quote_request: 'Quote request',
   service_request: 'Service request',
-  job_application: 'Job application'
+  job_application: 'Job application',
+  application_status_update: 'Applicant status update'
 };
 
 // Realistic sample data so the live preview shows exactly what an admin will actually receive,
@@ -52,11 +53,16 @@ const SAMPLE_LINES: Record<string, Array<{ label: string; value: string }>> = {
     { label: 'Phone', value: '079 222 3344' },
     { label: 'Cover message', value: 'I have 5 years experience in construction site safety.' },
     { label: 'CV', value: 'naledi_mokoena_cv.pdf' }
+  ],
+  application_status_update: [
+    { label: 'Role', value: 'Site Safety Officer' },
+    { label: 'Status', value: 'Offered' }
   ]
 };
 
 const SAMPLE_VARS: Record<string, Record<string, string>> = {
-  job_application: { role: 'Site Safety Officer' }
+  job_application: { role: 'Site Safety Officer' },
+  application_status_update: { name: 'Naledi Mokoena', role: 'Site Safety Officer', status: 'Offered' }
 };
 
 function substitute(text: string, vars: Record<string, string> | undefined): string {

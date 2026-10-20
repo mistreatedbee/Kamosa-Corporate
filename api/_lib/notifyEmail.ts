@@ -15,7 +15,7 @@ import { createClient } from '@supabase/supabase-js';
 const DEFAULT_RECIPIENT = 'info@kamosa.co.za';
 const NOTIFICATION_SENDER = 'Kamosa Website <notifications@kamosa.co.za>';
 
-export type NotificationType = 'enquiry' | 'quote_request' | 'service_request' | 'job_application';
+export type NotificationType = 'enquiry' | 'quote_request' | 'service_request' | 'job_application' | 'application_status_update';
 
 interface NotifyParams {
   type: NotificationType;
@@ -24,6 +24,9 @@ interface NotifyParams {
   lines: Array<{ label: string; value: string }>;
   /** {{key}} tokens in a custom subject/intro are substituted from this map. */
   vars?: Record<string, string>;
+  /** Overrides the admin-notification-recipient lookup — for applicant-facing emails
+   * (application_status_update), sent to a specific person, not the shared admin inbox. */
+  to?: string;
 }
 
 function substitute(text: string, vars: Record<string, string> | undefined): string {
@@ -63,7 +66,7 @@ export async function notifyByEmail(params: NotifyParams): Promise<void> {
   const overrides = await loadOverrides(params.type);
   const subject = substitute(overrides.subject || params.subject, params.vars);
   const intro = overrides.intro ? substitute(overrides.intro, params.vars) : undefined;
-  const recipient = overrides.recipient || DEFAULT_RECIPIENT;
+  const recipient = params.to || overrides.recipient || DEFAULT_RECIPIENT;
 
   const html = `
     <div style="font-family: sans-serif; font-size: 14px; color: #353535;">

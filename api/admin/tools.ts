@@ -46,7 +46,8 @@ const DEFAULT_TEMPLATES: Record<string, { subject: string; intro: string }> = {
   enquiry: { subject: 'New Kamosa Website Enquiry', intro: '' },
   quote_request: { subject: 'New Quote Request', intro: '' },
   service_request: { subject: 'New Service Request', intro: '' },
-  job_application: { subject: 'New Job Application: {{role}}', intro: '' }
+  job_application: { subject: 'New Job Application: {{role}}', intro: '' },
+  application_status_update: { subject: 'Update on your application for {{role}}', intro: '' }
 };
 
 const DEFAULT_RECIPIENT_EMAIL = 'info@kamosa.co.za';
