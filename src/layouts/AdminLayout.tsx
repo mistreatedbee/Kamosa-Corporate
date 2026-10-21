@@ -1,5 +1,6 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { BarChart3Icon, BriefcaseIcon, FileTextIcon, InboxIcon, LogOutIcon, MailIcon, SettingsIcon } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { BarChart3Icon, BriefcaseIcon, FileTextIcon, InboxIcon, LogOutIcon, MailIcon, MenuIcon, SettingsIcon, XIcon } from 'lucide-react';
 
 const NAV_ITEMS = [
   { label: 'Enquiries', to: '/admin', icon: InboxIcon, enabled: true },
@@ -19,9 +20,18 @@ const NAV_ITEMS = [
  * Every item is a real page now. `enabled` stays in the NAV_ITEMS shape (rendering a disabled,
  * "Soon"-badged row instead of a link) for whenever a future section ships before its page does —
  * it must never be a real link with nothing behind it.
+ * Below the md breakpoint the sidebar collapses behind a top bar menu button, so admin pages get
+ * the full phone width.
  */
 export function AdminLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const [navOpen, setNavOpen] = useState(false);
+
+  // Close the mobile menu after navigating.
+  useEffect(() => {
+    setNavOpen(false);
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
@@ -29,16 +39,32 @@ export function AdminLayout() {
   };
 
   return (
-    <div className="flex min-h-screen bg-[#F4F2F1]">
-      <aside className="flex w-60 shrink-0 flex-col bg-ink-900">
-        <div className="flex items-center gap-2.5 px-5 py-5">
+    <div className="flex min-h-screen flex-col bg-[#F4F2F1] md:flex-row">
+      <div className="flex items-center justify-between bg-ink-900 px-4 py-3 md:hidden">
+        <div className="flex items-center gap-2.5">
+          <img src="/logo.jpg" alt="Kamosa logo" className="h-7 w-7 rounded-sm object-cover ring-1 ring-white/10" />
+          <span className="font-display text-sm font-bold uppercase tracking-[0.14em] text-white">Kamosa Admin</span>
+        </div>
+        <button
+          type="button"
+          onClick={() => setNavOpen((prev) => !prev)}
+          aria-expanded={navOpen}
+          aria-controls="admin-sidebar"
+          aria-label={navOpen ? 'Close menu' : 'Open menu'}
+          className="rounded-md p-2 text-white/80 hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-white">
+          {navOpen ? <XIcon className="h-5 w-5" aria-hidden={true} /> : <MenuIcon className="h-5 w-5" aria-hidden={true} />}
+        </button>
+      </div>
+
+      <aside id="admin-sidebar" className={`${navOpen ? 'flex' : 'hidden'} shrink-0 flex-col bg-ink-900 md:flex md:w-60`}>
+        <div className="hidden items-center gap-2.5 px-5 py-5 md:flex">
           <img src="/logo.jpg" alt="Kamosa logo" className="h-8 w-8 rounded-sm object-cover ring-1 ring-white/10" />
           <span className="font-display text-sm font-bold uppercase tracking-[0.14em] text-white">
             Kamosa Admin
           </span>
         </div>
 
-        <nav className="mt-4 flex-1 space-y-1 px-3">
+        <nav className="flex-1 space-y-1 px-3 pt-2 md:mt-4 md:pt-0">
           {NAV_ITEMS.map((item) =>
             item.enabled ? (
               <NavLink
@@ -80,8 +106,8 @@ export function AdminLayout() {
         </div>
       </aside>
 
-      <main className="flex-1 overflow-x-hidden px-8 py-10">
-        <div className="mx-auto max-w-5xl">
+      <main className="min-w-0 flex-1 overflow-x-hidden px-4 py-6 sm:px-6 md:px-8 md:py-10">
+        <div className="mx-auto max-w-6xl">
           <Outlet />
         </div>
       </main>

@@ -1,16 +1,12 @@
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { CheckIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { RepeatableListField } from './RepeatableListField';
 import { SuggestionList } from '../SuggestionList';
 import { JobPostingPreview } from '../careers/JobPostingPreview';
 import {
   CURRENCIES,
-  EDUCATION_LEVELS,
-  EMPLOYEE_BENEFITS,
   INDUSTRIES,
   JOB_CATEGORIES,
-  QUALIFICATION_SUGGESTIONS,
-  SA_LANGUAGES,
   WORKING_HOURS_OPTIONS
 } from '../../data/formSuggestions';
 import {
