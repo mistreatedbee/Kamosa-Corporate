@@ -14,7 +14,18 @@ import { Seo } from '../components/Seo';
 import { PageHeader } from '../components/PageHeader';
 import { Container } from '../components/Container';
 import { Button } from '../components/Button';
+import { SuggestionList } from '../components/SuggestionList';
 import { company } from '../data/company';
+import {
+  COMPLIANCE_STATUSES,
+  ORGANISATION_TYPES,
+  PROCUREMENT_CATEGORIES,
+  PROJECT_DURATIONS,
+  SAFETY_DOCUMENTS,
+  SA_LOCATIONS,
+  SITE_TYPES,
+  TRAINING_COURSES
+} from '../data/formSuggestions';
 import {
   QUOTE_FORM_DEFAULTS,
   submitQuoteRequest,
@@ -224,24 +235,30 @@ export function RequestAQuote() {
                       <>
                         <Field label="Site / project type" required error={errors.siteType?.message}>
                           <input
+                            list="site-type-suggestions"
                             className={inputClass(Boolean(errors.siteType))}
                             placeholder="e.g. Underground mine, construction site, warehouse"
                             {...register('siteType', { required: 'Please tell us the site or project type.' })} />
+                          <SuggestionList id="site-type-suggestions" options={SITE_TYPES} />
                         </Field>
                         <Field label="General location (province/city)">
-                          <input className={inputClass(false)} placeholder="e.g. Rustenburg, North West" {...register('hsLocation')} />
+                          <input list="location-suggestions" className={inputClass(false)} placeholder="e.g. Rustenburg, North West" {...register('hsLocation')} />
+                          <SuggestionList id="location-suggestions" options={SA_LOCATIONS} />
                         </Field>
                         <Field label="Approximate worker count">
                           <input className={inputClass(false)} placeholder="e.g. 50" {...register('workerCount')} />
                         </Field>
                         <Field label="Duration">
-                          <input className={inputClass(false)} placeholder="e.g. 3 months" {...register('duration')} />
+                          <input list="duration-suggestions" className={inputClass(false)} placeholder="e.g. 3 months" {...register('duration')} />
+                          <SuggestionList id="duration-suggestions" options={PROJECT_DURATIONS} />
                         </Field>
                         <Field label="Documentation needed" className="sm:col-span-2">
-                          <input className={inputClass(false)} placeholder="e.g. safety file, HIRA, tender pack" {...register('docsNeeded')} />
+                          <input list="docs-suggestions" className={inputClass(false)} placeholder="e.g. safety file, HIRA, tender pack" {...register('docsNeeded')} />
+                          <SuggestionList id="docs-suggestions" options={SAFETY_DOCUMENTS} />
                         </Field>
                         <Field label="Current compliance status" className="sm:col-span-2">
-                          <input className={inputClass(false)} placeholder="e.g. No formal safety file yet" {...register('complianceStatus')} />
+                          <input list="compliance-suggestions" className={inputClass(false)} placeholder="e.g. No formal safety file yet" {...register('complianceStatus')} />
+                          <SuggestionList id="compliance-suggestions" options={COMPLIANCE_STATUSES} />
                         </Field>
                       </>
                     ) : null}
@@ -250,9 +267,11 @@ export function RequestAQuote() {
                       <>
                         <Field label="Course of interest" required error={errors.course?.message}>
                           <input
+                            list="course-suggestions"
                             className={inputClass(Boolean(errors.course))}
                             placeholder="e.g. SAMTRAC, First Aid Level 2, HIRA"
                             {...register('course', { required: 'Please tell us which course.' })} />
+                          <SuggestionList id="course-suggestions" options={TRAINING_COURSES} />
                         </Field>
                         <Field label="Approximate participant count" required error={errors.participantCount?.message}>
                           <input
@@ -264,10 +283,12 @@ export function RequestAQuote() {
                           <input type="date" className={inputClass(false)} {...register('preferredDate')} />
                         </Field>
                         <Field label="Location">
-                          <input className={inputClass(false)} placeholder="e.g. On-site in Polokwane" {...register('trainingLocation')} />
+                          <input list="training-location-suggestions" className={inputClass(false)} placeholder="e.g. On-site in Polokwane" {...register('trainingLocation')} />
+                          <SuggestionList id="training-location-suggestions" options={SA_LOCATIONS} />
                         </Field>
                         <Field label="Organisation type" className="sm:col-span-2">
-                          <input className={inputClass(false)} placeholder="e.g. Mining contractor, logistics company" {...register('organisationType')} />
+                          <input list="org-type-suggestions" className={inputClass(false)} placeholder="e.g. Mining contractor, logistics company" {...register('organisationType')} />
+                          <SuggestionList id="org-type-suggestions" options={ORGANISATION_TYPES} />
                         </Field>
                       </>
                     ) : null}
@@ -276,9 +297,11 @@ export function RequestAQuote() {
                       <>
                         <Field label="Product category" required error={errors.productCategory?.message}>
                           <input
+                            list="product-category-suggestions"
                             className={inputClass(Boolean(errors.productCategory))}
                             placeholder="PPE, tools/consumables, or signage"
                             {...register('productCategory', { required: 'Please tell us the product category.' })} />
+                          <SuggestionList id="product-category-suggestions" options={PROCUREMENT_CATEGORIES} />
                         </Field>
                         <Field label="Approximate quantity" required error={errors.quantity?.message}>
                           <input
@@ -287,7 +310,8 @@ export function RequestAQuote() {
                             {...register('quantity', { required: 'Please give an approximate quantity.' })} />
                         </Field>
                         <Field label="Delivery location">
-                          <input className={inputClass(false)} placeholder="e.g. Johannesburg warehouse" {...register('deliveryLocation')} />
+                          <input list="delivery-location-suggestions" className={inputClass(false)} placeholder="e.g. Johannesburg warehouse" {...register('deliveryLocation')} />
+                          <SuggestionList id="delivery-location-suggestions" options={SA_LOCATIONS} />
                         </Field>
                         <Field label="Needed by">
                           <input type="date" className={inputClass(false)} {...register('neededBy')} />

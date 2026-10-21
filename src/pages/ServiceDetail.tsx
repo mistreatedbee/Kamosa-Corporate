@@ -5,6 +5,7 @@ import { PageHeader } from '../components/PageHeader';
 import { Container } from '../components/Container';
 import { Reveal } from '../components/Reveal';
 import { CTASection } from '../components/CTASection';
+import { WhatsAppButton } from '../components/WhatsAppButton';
 import { NotFound } from './NotFound';
 import { services } from '../data/services';
 
@@ -68,16 +69,19 @@ export function ServiceDetail() {
                     </li>
                   )}
                 </ul>
-                <Link
-                  to="/contact"
-                  className="group mt-8 inline-flex items-center gap-2 font-display text-sm font-semibold text-brand-600">
-                  
-                  Discuss this service
-                  <ArrowRightIcon
-                    className="h-4 w-4 transition-transform duration-200 ease-editorial group-hover:translate-x-1"
-                    aria-hidden="true" />
-                  
-                </Link>
+                <div className="mt-8 flex flex-col gap-3">
+                  <Link
+                    to={`/contact?service=${encodeURIComponent(service.title)}`}
+                    className="group inline-flex items-center gap-2 font-display text-sm font-semibold text-brand-600">
+                    Request an Enquiry
+                    <ArrowRightIcon
+                      className="h-4 w-4 transition-transform duration-200 ease-editorial group-hover:translate-x-1"
+                      aria-hidden="true" />
+                  </Link>
+                  <WhatsAppButton
+                    message={`Hi, I'm interested in ${service.title} and would like to find out more.`}
+                    className="w-fit" />
+                </div>
               </div>
             </Reveal>
           </div>

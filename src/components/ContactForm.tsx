@@ -21,8 +21,16 @@ const fieldClass =
 const errorFieldClass = 'border-error-600 hover:border-error-600';
 const labelClass = 'block font-display text-[0.8125rem] font-semibold text-ink-900';
 
-export function ContactForm() {
-  const [values, setValues] = useState<EnquiryPayload>(EMPTY);
+interface ContactFormProps {
+  /** Pre-selects the "Service Required" dropdown — e.g. when arriving via a service page's
+   * "Request an Enquiry" link, so the visitor doesn't have to pick it again. Falls back to the
+   * blank "Select a service" state if the value doesn't match a known option. */
+  defaultService?: string;
+}
+
+export function ContactForm({ defaultService }: ContactFormProps = {}) {
+  const initialService = defaultService && serviceOptions.includes(defaultService) ? defaultService : '';
+  const [values, setValues] = useState<EnquiryPayload>({ ...EMPTY, service: initialService });
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<EnquiryResult | null>(null);

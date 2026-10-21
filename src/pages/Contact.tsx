@@ -1,3 +1,4 @@
+import { useSearchParams } from 'react-router-dom';
 import { GlobeIcon, MailIcon, MapPinIcon, PhoneIcon } from 'lucide-react';
 import { Seo } from '../components/Seo';
 import { PageHeader } from '../components/PageHeader';
@@ -7,6 +8,9 @@ import { ContactForm } from '../components/ContactForm';
 import { company } from '../data/company';
 
 export function Contact() {
+  const [searchParams] = useSearchParams();
+  const defaultService = searchParams.get('service') ?? undefined;
+
   return (
     <>
       <Seo
@@ -108,7 +112,7 @@ export function Contact() {
             </Reveal>
 
             <Reveal index={1}>
-              <ContactForm />
+              <ContactForm defaultService={defaultService} />
             </Reveal>
           </div>
         </Container>

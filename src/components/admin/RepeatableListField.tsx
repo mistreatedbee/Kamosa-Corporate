@@ -1,4 +1,4 @@
-import { useState, type KeyboardEvent } from 'react';
+import { useId, useState, type KeyboardEvent } from 'react';
 import { PlusIcon, XIcon } from 'lucide-react';
 
 interface RepeatableListFieldProps {
@@ -7,13 +7,16 @@ interface RepeatableListFieldProps {
   onChange: (items: string[]) => void;
   placeholder?: string;
   helpText?: string;
+  /** Common options shown as a real clickable <datalist> dropdown — free text still works. */
+  suggestions?: string[];
 }
 
 /** Add/remove one entry at a time — the spec's own ask is "no complicated formatting," so this
  * replaces the earlier plain one-per-line textarea with a real list UI for the fields admins are
  * most likely to build up incrementally (requirements, benefits, qualifications, languages). */
-export function RepeatableListField({ label, items, onChange, placeholder, helpText }: RepeatableListFieldProps) {
+export function RepeatableListField({ label, items, onChange, placeholder, helpText, suggestions }: RepeatableListFieldProps) {
   const [draft, setDraft] = useState('');
+  const listId = useId();
 
   const add = () => {
     const value = draft.trim();
@@ -58,11 +61,19 @@ export function RepeatableListField({ label, items, onChange, placeholder, helpT
       <div className="mt-2 flex gap-2">
         <input
           type="text"
+          list={suggestions ? listId : undefined}
           value={draft}
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           className="flex-1 rounded-md border border-hairline bg-white px-3 py-2 text-[0.875rem] text-ink-900 focus:border-brand-600 focus:outline-none" />
+        {suggestions ? (
+          <datalist id={listId}>
+            {suggestions.map((option) => (
+              <option key={option} value={option} />
+            ))}
+          </datalist>
+        ) : null}
         <button
           type="button"
           onClick={add}

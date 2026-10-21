@@ -1,7 +1,18 @@
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { CheckIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { RepeatableListField } from './RepeatableListField';
+import { SuggestionList } from '../SuggestionList';
 import { JobPostingPreview } from '../careers/JobPostingPreview';
+import {
+  CURRENCIES,
+  EDUCATION_LEVELS,
+  EMPLOYEE_BENEFITS,
+  INDUSTRIES,
+  JOB_CATEGORIES,
+  QUALIFICATION_SUGGESTIONS,
+  SA_LANGUAGES,
+  WORKING_HOURS_OPTIONS
+} from '../../data/formSuggestions';
 import {
   DOCUMENT_TYPES,
   DOCUMENT_TYPE_LABELS,
@@ -317,19 +328,23 @@ function StepBasicInfo({ values, set, errors }: StepProps) {
         <label className={labelClass}>Category</label>
         <input
           type="text"
+          list="job-category-suggestions"
           value={values.category}
           onChange={(e) => set('category', e.target.value)}
           placeholder="e.g. Health & Safety"
           className={inputClass} />
+        <SuggestionList id="job-category-suggestions" options={JOB_CATEGORIES} />
       </div>
       <div>
         <label className={labelClass}>Industry</label>
         <input
           type="text"
+          list="job-industry-suggestions"
           value={values.industry}
           onChange={(e) => set('industry', e.target.value)}
           placeholder="e.g. Mining & Construction"
           className={inputClass} />
+        <SuggestionList id="job-industry-suggestions" options={INDUSTRIES} />
       </div>
       <div>
         <label className={labelClass}>Department</label>
@@ -411,10 +426,12 @@ function StepEmploymentDetails({ values, set, errors }: StepProps) {
         <label className={labelClass}>Working hours</label>
         <input
           type="text"
+          list="working-hours-suggestions"
           value={values.workingHours}
           onChange={(e) => set('workingHours', e.target.value)}
           placeholder="e.g. Monday–Friday, 08:00–17:00"
           className={inputClass} />
+        <SuggestionList id="working-hours-suggestions" options={WORKING_HOURS_OPTIONS} />
       </div>
 
       <div>
@@ -447,7 +464,13 @@ function StepEmploymentDetails({ values, set, errors }: StepProps) {
             </div>
             <div>
               <label className={labelClass}>Currency</label>
-              <input type="text" value={values.salaryCurrency} onChange={(e) => set('salaryCurrency', e.target.value)} className={inputClass} />
+              <select value={values.salaryCurrency} onChange={(e) => set('salaryCurrency', e.target.value)} className={inputClass}>
+                {CURRENCIES.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label className={labelClass}>Frequency</label>
