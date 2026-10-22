@@ -248,6 +248,12 @@ async function resetTemplate(type: string, res: VercelResponse, supabase: Servic
 
 // --- Settings ---
 
+// The four admin-notification categories a lead can trigger — kept distinct from
+// application_status_update (the applicant-facing email), which isn't an admin notification and
+// has no toggle. Keys mirror api/_lib/notifyEmail.ts's NotificationType values exactly.
+const NOTIFICATION_CATEGORIES = ['enquiry', 'quote_request', 'service_request', 'job_application'] as const;
+const categorySettingKey = (type: string) => `notify_${type}_enabled`;
+
 async function getSettings(res: VercelResponse, supabase: ServiceClient) {
   const { data, error } = await supabase.from('site_settings').select('key, value');
   if (error) {
@@ -255,9 +261,14 @@ async function getSettings(res: VercelResponse, supabase: ServiceClient) {
   }
 
   const byKey = Object.fromEntries((data ?? []).map((row) => [row.key, row.value]));
+  const notificationCategories = Object.fromEntries(
+    NOTIFICATION_CATEGORIES.map((type) => [type, byKey[categorySettingKey(type)] !== 'false'])
+  );
+
   return res.status(200).json({
     notificationRecipientEmail: byKey.notification_recipient_email ?? DEFAULT_RECIPIENT_EMAIL,
-    emailNotificationsConfigured: Boolean(process.env.RESEND_API_KEY)
+    emailNotificationsConfigured: Boolean(process.env.RESEND_API_KEY),
+    notificationCategories
   });
 }
 
@@ -274,15 +285,138 @@ async function updateSettings(req: VercelRequest, res: VercelResponse, supabase:
     return res.status(400).json({ error: 'A valid notification recipient email is required' });
   }
 
-  const { error } = await supabase
-    .from('site_settings')
-    .upsert({ key: 'notification_recipient_email', value: email }, { onConflict: 'key' });
+  const rows = [{ key: 'notification_recipient_email', value: email }];
+
+  const categories = body?.notificationCategories;
+  if (categories && typeof categories === 'object') {
+    for (const type of NOTIFICATION_CATEGORIES) {
+      const value = (categories as Record<string, unknown>)[type];
+      if (typeof value === 'boolean') {
+        rows.push({ key: categorySettingKey(type), value: value ? 'true' : 'false' });
+      }
+    }
+  }
+
+  const { error } = await supabase.from('site_settings').upsert(rows, { onConflict: 'key' });
 
   if (error) {
     return res.status(500).json({ error: 'Failed to update settings' });
   }
 
   return res.status(200).json({ notificationRecipientEmail: email });
+}
+
+async function sendTestNotification(res: VercelResponse, supabase: ServiceClient) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    return res.status(400).json({ error: 'RESEND_API_KEY is not configured — nothing to test.' });
+  }
+
+  const { data } = await supabase.from('site_settings').select('value').eq('key', 'notification_recipient_email').maybeSingle();
+  const recipient = data?.value || DEFAULT_RECIPIENT_EMAIL;
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${apiKey}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'Kamosa Website <notifications@kamosa.co.za>',
+        to: [recipient],
+        subject: 'Kamosa Admin — Test Notification',
+        html: '<p>This is a test notification sent from the Kamosa admin Settings page. If you received this, email notifications are working correctly.</p>'
+      })
+    });
+
+    // Unlike notifyByEmail (which must never block a lead submission on a mail failure), this is
+    // an explicit "Send Test Email" button — the admin clicked it specifically to find out whether
+    // it works, so the real Resend response status is what gets reported back, not an optimistic
+    // "request was sent."
+    if (!response.ok) {
+      const detail = await response.text().catch(() => '');
+      return res.status(502).json({ error: `Resend rejected the test email (HTTP ${response.status}).`, detail });
+    }
+
+    return res.status(200).json({ sentTo: recipient });
+  } catch (err) {
+    return res.status(502).json({ error: err instanceof Error ? err.message : 'Could not reach Resend.' });
+  }
+}
+
+// --- Company information (phone, WhatsApp number, email, tagline) + homepage SEO overrides ---
+// These mirror the hardcoded defaults in src/data/company.ts exactly — that file remains the
+// fallback the public site falls back to (via CompanyContext) if no override is set or the fetch
+// fails, so an empty site_settings table never breaks the live site. Only a small, named allow-list
+// of fields is editable here — company registration number, CSD number, and similar facts stay
+// code-only per docs/DECISIONS.md's "don't assume a new fact, preserve existing values" posture.
+const COMPANY_INFO_DEFAULTS = {
+  phone: '071 191 4744',
+  whatsappNumber: '27711914744',
+  email: 'info@kamosa.co.za',
+  tagline: 'Building Trust Through Professional Excellence'
+};
+const PHONE_RE = /^[0-9+()\s-]{7,20}$/;
+const WHATSAPP_RE = /^[0-9]{10,15}$/;
+
+async function getCompanyInfo(res: VercelResponse, supabase: ServiceClient) {
+  const { data, error } = await supabase
+    .from('site_settings')
+    .select('key, value')
+    .in('key', ['company_phone', 'company_whatsapp_number', 'company_email', 'company_tagline', 'homepage_seo_title', 'homepage_seo_description']);
+
+  if (error) {
+    return res.status(500).json({ error: 'Failed to load company information' });
+  }
+
+  const byKey = Object.fromEntries((data ?? []).map((row) => [row.key, row.value]));
+  return res.status(200).json({
+    phone: byKey.company_phone ?? COMPANY_INFO_DEFAULTS.phone,
+    whatsappNumber: byKey.company_whatsapp_number ?? COMPANY_INFO_DEFAULTS.whatsappNumber,
+    email: byKey.company_email ?? COMPANY_INFO_DEFAULTS.email,
+    tagline: byKey.company_tagline ?? COMPANY_INFO_DEFAULTS.tagline,
+    homepageSeoTitle: byKey.homepage_seo_title ?? '',
+    homepageSeoDescription: byKey.homepage_seo_description ?? ''
+  });
+}
+
+async function updateCompanyInfo(req: VercelRequest, res: VercelResponse, supabase: ServiceClient) {
+  let body: Record<string, unknown>;
+  try {
+    body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
+  } catch {
+    return res.status(400).json({ error: 'Invalid request body' });
+  }
+
+  const phone = String(body?.phone ?? '').trim();
+  const whatsappNumber = String(body?.whatsappNumber ?? '').trim();
+  const email = String(body?.email ?? '').trim();
+  const tagline = String(body?.tagline ?? '').trim();
+  const homepageSeoTitle = String(body?.homepageSeoTitle ?? '').trim();
+  const homepageSeoDescription = String(body?.homepageSeoDescription ?? '').trim();
+
+  if (!PHONE_RE.test(phone)) return res.status(400).json({ error: 'Please enter a valid phone number.' });
+  if (!WHATSAPP_RE.test(whatsappNumber)) return res.status(400).json({ error: 'WhatsApp number must be digits only, with country code (e.g. 27711914744).' });
+  if (!EMAIL_RE.test(email)) return res.status(400).json({ error: 'Please enter a valid email address.' });
+  if (!tagline) return res.status(400).json({ error: 'Tagline is required.' });
+  if (homepageSeoTitle.length > 70) return res.status(400).json({ error: 'Homepage SEO title should be 70 characters or fewer.' });
+  if (homepageSeoDescription.length > 160) return res.status(400).json({ error: 'Homepage SEO description should be 160 characters or fewer.' });
+
+  const { error } = await supabase.from('site_settings').upsert(
+    [
+      { key: 'company_phone', value: phone },
+      { key: 'company_whatsapp_number', value: whatsappNumber },
+      { key: 'company_email', value: email },
+      { key: 'company_tagline', value: tagline },
+      { key: 'homepage_seo_title', value: homepageSeoTitle },
+      { key: 'homepage_seo_description', value: homepageSeoDescription }
+    ],
+    { onConflict: 'key' }
+  );
+
+  if (error) {
+    return res.status(500).json({ error: 'Failed to update company information' });
+  }
+
+  return res.status(200).json({ phone, whatsappNumber, email, tagline, homepageSeoTitle, homepageSeoDescription });
 }
 
 // --- MFA enrollment (the login-time challenge itself lives in api/admin/login.ts) ---
@@ -424,8 +558,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (resource === 'settings') {
+    const action = typeof req.query.action === 'string' ? req.query.action : undefined;
+    if (req.method === 'POST' && action === 'test') return sendTestNotification(res, supabase);
     if (req.method === 'GET') return getSettings(res, supabase);
     if (req.method === 'PATCH') return updateSettings(req, res, supabase);
+    res.setHeader('Allow', 'GET, PATCH, POST');
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  if (resource === 'company-info') {
+    if (req.method === 'GET') return getCompanyInfo(res, supabase);
+    if (req.method === 'PATCH') return updateCompanyInfo(req, res, supabase);
     res.setHeader('Allow', 'GET, PATCH');
     return res.status(405).json({ error: 'Method not allowed' });
   }

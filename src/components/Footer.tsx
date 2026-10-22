@@ -3,6 +3,7 @@ import { LockIcon } from 'lucide-react';
 import { Container } from './Container';
 import { company } from '../data/company';
 import { services } from '../data/services';
+import { useCompany } from '../contexts/CompanyContext';
 
 const companyLinks = [
 { label: 'About', to: '/about' },
@@ -17,6 +18,7 @@ const companyLinks = [
 
 
 export function Footer() {
+  const contact = useCompany();
   return (
     <footer className="bg-ink-900 text-white">
       <Container className="py-16 lg:py-20">
@@ -36,7 +38,7 @@ export function Footer() {
               </span>
             </Link>
             <p className="mt-6 max-w-xs text-[0.9375rem] leading-relaxed text-white/60">
-              {company.tagline}.
+              {contact.tagline}.
             </p>
           </div>
 
@@ -88,13 +90,13 @@ export function Footer() {
             <h2 className="font-display text-eyebrow font-semibold uppercase text-gold">Contact</h2>
             <ul className="mt-5 space-y-3 text-[0.9375rem] text-white/70">
               <li>
-                <a href={company.phoneHref} className="transition-colors duration-200 hover:text-white">
-                  {company.phone}
+                <a href={contact.phoneHref} className="transition-colors duration-200 hover:text-white">
+                  {contact.phone}
                 </a>
               </li>
               <li>
-                <a href={company.emailHref} className="break-all transition-colors duration-200 hover:text-white">
-                  {company.email}
+                <a href={contact.emailHref} className="break-all transition-colors duration-200 hover:text-white">
+                  {contact.email}
                 </a>
               </li>
               <li>{company.operatingArea}</li>

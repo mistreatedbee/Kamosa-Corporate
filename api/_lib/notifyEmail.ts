@@ -34,22 +34,36 @@ function substitute(text: string, vars: Record<string, string> | undefined): str
   return text.replace(/\{\{(\w+)\}\}/g, (match, key) => vars[key] ?? match);
 }
 
-async function loadOverrides(type: NotificationType): Promise<{ subject?: string; intro?: string; recipient?: string }> {
+// The four categories the admin can individually switch off in Settings. application_status_update
+// (the applicant-facing email) isn't in this list on purpose — it's not an admin notification, it
+// goes to the applicant themselves, so it has no "category toggle."
+const TOGGLEABLE_TYPES = new Set(['enquiry', 'quote_request', 'service_request', 'job_application']);
+
+async function loadOverrides(
+  type: NotificationType
+): Promise<{ subject?: string; intro?: string; recipient?: string; disabled?: boolean }> {
   const url = process.env.VITE_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY_LEGACY_JWT || process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!url || !key) return {};
 
   try {
     const supabase = createClient(url, key, { auth: { persistSession: false } });
-    const [templateResult, settingResult] = await Promise.all([
+    const lookups = [
       supabase.from('email_templates').select('subject, intro').eq('type', type).maybeSingle(),
       supabase.from('site_settings').select('value').eq('key', 'notification_recipient_email').maybeSingle()
-    ]);
+    ];
+    if (TOGGLEABLE_TYPES.has(type)) {
+      lookups.push(supabase.from('site_settings').select('value').eq('key', `notify_${type}_enabled`).maybeSingle());
+    }
+    const [templateResult, settingResult, toggleResult] = await Promise.all(lookups);
 
     return {
       subject: templateResult.data?.subject ?? undefined,
       intro: templateResult.data?.intro ?? undefined,
-      recipient: settingResult.data?.value ?? undefined
+      recipient: settingResult.data?.value ?? undefined,
+      // Only an explicit 'false' disables — a missing row (default) or a failed lookup both mean
+      // "enabled," so a Supabase hiccup can never silently swallow a real lead notification.
+      disabled: toggleResult?.data?.value === 'false'
     };
   } catch {
     return {};
@@ -64,6 +78,11 @@ export async function notifyByEmail(params: NotifyParams): Promise<void> {
   }
 
   const overrides = await loadOverrides(params.type);
+  if (overrides.disabled) {
+    // The admin explicitly switched this category off in Settings — the lead is still safely in
+    // Postgres either way, this only suppresses the email.
+    return;
+  }
   const subject = substitute(overrides.subject || params.subject, params.vars);
   const intro = overrides.intro ? substitute(overrides.intro, params.vars) : undefined;
   const recipient = params.to || overrides.recipient || DEFAULT_RECIPIENT;

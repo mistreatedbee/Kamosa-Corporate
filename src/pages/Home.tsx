@@ -1,4 +1,5 @@
 import { Seo } from '../components/Seo';
+import { useCompany } from '../contexts/CompanyContext';
 import { Hero } from '../components/Hero';
 import { TrustStrip } from '../components/TrustStrip';
 import { AboutSection } from '../components/AboutSection';
@@ -13,12 +14,17 @@ import { EnvironmentalSection } from '../components/EnvironmentalSection';
 import { CareersTeaser } from '../components/CareersTeaser';
 import { CTASection } from '../components/CTASection';
 
+const DEFAULT_SEO_TITLE = 'Kamosa (Pty) Ltd | Health, Safety, Compliance & Business Solutions';
+const DEFAULT_SEO_DESCRIPTION =
+  'Kamosa (Pty) Ltd provides professional health, safety and compliance, business consulting, procurement and training solutions across South Africa.';
+
 export function Home() {
+  const { homepageSeoTitle, homepageSeoDescription } = useCompany();
   return (
     <>
       <Seo
-        title="Kamosa (Pty) Ltd | Health, Safety, Compliance & Business Solutions"
-        description="Kamosa (Pty) Ltd provides professional health, safety and compliance, business consulting, procurement and training solutions across South Africa."
+        title={homepageSeoTitle || DEFAULT_SEO_TITLE}
+        description={homepageSeoDescription || DEFAULT_SEO_DESCRIPTION}
         image="/d88a7876-ba83-4c30-b30d-f9cb4387d34e.jpg" />
       
       <Hero />

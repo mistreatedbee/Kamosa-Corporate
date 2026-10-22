@@ -6,10 +6,12 @@ import { Container } from '../components/Container';
 import { Reveal } from '../components/Reveal';
 import { ContactForm } from '../components/ContactForm';
 import { company } from '../data/company';
+import { useCompany } from '../contexts/CompanyContext';
 
 export function Contact() {
   const [searchParams] = useSearchParams();
   const defaultService = searchParams.get('service') ?? undefined;
+  const contact = useCompany();
 
   return (
     <>
@@ -49,10 +51,10 @@ export function Contact() {
                       Telephone
                     </p>
                     <a
-                      href={company.phoneHref}
+                      href={contact.phoneHref}
                       className="mt-1 block text-[0.9375rem] text-ink-900 transition-colors duration-200 hover:text-brand-600">
-                      
-                      {company.phone}
+
+                      {contact.phone}
                     </a>
                   </div>
                 </li>
@@ -63,10 +65,10 @@ export function Contact() {
                       Email
                     </p>
                     <a
-                      href={company.emailHref}
+                      href={contact.emailHref}
                       className="mt-1 block break-all text-[0.9375rem] text-ink-900 transition-colors duration-200 hover:text-brand-600">
-                      
-                      {company.email}
+
+                      {contact.email}
                     </a>
                   </div>
                 </li>

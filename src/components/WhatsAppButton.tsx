@@ -1,5 +1,5 @@
 import { MessageCircleIcon } from 'lucide-react';
-import { company } from '../data/company';
+import { useCompany } from '../contexts/CompanyContext';
 
 interface WhatsAppButtonProps {
   /** Service-aware pre-filled message, e.g. "Hi, I'm interested in Health, Safety & Compliance and would like a quote." */
@@ -15,6 +15,7 @@ interface WhatsAppButtonProps {
  * enabled (071 191 4744).
  */
 export function WhatsAppButton({ message, inverted = false, className = '' }: WhatsAppButtonProps) {
+  const company = useCompany();
   const defaultMessage = "Hi, I'd like to find out more about Kamosa's services.";
   const href = `https://wa.me/${company.whatsappNumber}?text=${encodeURIComponent(message ?? defaultMessage)}`;
 

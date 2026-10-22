@@ -1,5 +1,5 @@
 import { MessageCircleIcon } from 'lucide-react';
-import { company } from '../data/company';
+import { useCompany } from '../contexts/CompanyContext';
 
 /**
  * Mobile-only floating WhatsApp button per docs/CONVERSION_STRATEGY.md §6 — supplements the
@@ -7,6 +7,7 @@ import { company } from '../data/company';
  * (sm:hidden) since the inline placements already cover that context.
  */
 export function StickyWhatsAppButton() {
+  const company = useCompany();
   const href = `https://wa.me/${company.whatsappNumber}?text=${encodeURIComponent("Hi, I'd like to find out more about Kamosa's services.")}`;
 
   return (

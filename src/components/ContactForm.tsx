@@ -3,7 +3,7 @@ import { AlertCircleIcon, CheckCircle2Icon, Loader2Icon, type LucideIcon } from 
 import { Button } from './Button';
 import { SuggestionChips } from './SuggestionChips';
 import { serviceOptions } from '../data/services';
-import { company } from '../data/company';
+import { useCompany } from '../contexts/CompanyContext';
 import { CONTACT_MESSAGE_PROMPTS } from '../data/formSuggestions';
 import { submitEnquiry, validateEnquiry, type EnquiryPayload, type EnquiryResult } from '../utils/enquiry';
 
@@ -31,6 +31,7 @@ interface ContactFormProps {
 }
 
 export function ContactForm({ defaultService }: ContactFormProps = {}) {
+  const company = useCompany();
   const initialService = defaultService && serviceOptions.includes(defaultService) ? defaultService : '';
   const [values, setValues] = useState<EnquiryPayload>({ ...EMPTY, service: initialService });
   const [errors, setErrors] = useState<Errors>({});

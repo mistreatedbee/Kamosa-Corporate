@@ -2,7 +2,8 @@ import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { ArrowRightIcon, XIcon } from 'lucide-react';
-import { company, navLinks } from '../data/company';
+import { navLinks } from '../data/company';
+import { useCompany } from '../contexts/CompanyContext';
 
 interface MobileMenuProps {
   open: boolean;
@@ -11,6 +12,7 @@ interface MobileMenuProps {
 
 export function MobileMenu({ open, onClose }: MobileMenuProps) {
   const reduceMotion = useReducedMotion();
+  const company = useCompany();
 
   useEffect(() => {
     if (!open) return;

@@ -2,7 +2,7 @@ import { Container } from './Container';
 import { Reveal } from './Reveal';
 import { ButtonAnchor, ButtonLink } from './Button';
 import { WhatsAppButton } from './WhatsAppButton';
-import { company } from '../data/company';
+import { useCompany } from '../contexts/CompanyContext';
 
 interface CTASectionProps {
   /** Service-aware pre-filled WhatsApp message, e.g. for a specific service/industry page. */
@@ -10,6 +10,7 @@ interface CTASectionProps {
 }
 
 export function CTASection({ whatsappMessage }: CTASectionProps = {}) {
+  const company = useCompany();
   return (
     <section className="bg-ink-900" aria-labelledby="cta-heading">
       <Container className="py-16 lg:py-24">
