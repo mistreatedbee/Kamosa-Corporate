@@ -1,4 +1,4 @@
-import { useId, useState } from 'react';
+import { useState } from 'react';
 import { CheckIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { RepeatableListField } from './RepeatableListField';
 import { SuggestionList } from '../SuggestionList';
@@ -11,6 +11,7 @@ import {
   JOB_CATEGORIES,
   QUALIFICATION_SUGGESTIONS,
   SA_LANGUAGES,
+  SA_LOCATIONS,
   WORKING_HOURS_OPTIONS
 } from '../../data/formSuggestions';
 import {
@@ -417,7 +418,8 @@ function StepEmploymentDetails({ values, set, errors }: StepProps) {
       {values.workArrangement !== 'remote' ? (
         <div className="sm:col-span-2">
           <label className={labelClass}>Location *</label>
-          <input type="text" value={values.location} onChange={(e) => set('location', e.target.value)} className={inputClass} />
+          <input type="text" list="job-location-suggestions" value={values.location} onChange={(e) => set('location', e.target.value)} className={inputClass} />
+          <SuggestionList id="job-location-suggestions" options={SA_LOCATIONS} />
           {errors?.location ? <p className="mt-1 text-[0.75rem] text-error-600">{errors.location}</p> : null}
         </div>
       ) : null}
@@ -492,6 +494,7 @@ function StepEmploymentDetails({ values, set, errors }: StepProps) {
           items={values.benefits}
           onChange={(items) => set('benefits', items)}
           placeholder="e.g. Medical aid contribution"
+          suggestions={EMPLOYEE_BENEFITS}
         />
       </div>
     </div>
@@ -505,10 +508,12 @@ function StepRequirements({ values, set }: StepProps) {
         <label className={labelClass}>Minimum education level</label>
         <input
           type="text"
+          list="education-level-suggestions"
           value={values.educationLevel}
           onChange={(e) => set('educationLevel', e.target.value)}
           placeholder="e.g. National Diploma"
           className={inputClass} />
+        <SuggestionList id="education-level-suggestions" options={EDUCATION_LEVELS} />
       </div>
       <div>
         <label className={labelClass}>Minimum years of experience</label>
@@ -541,6 +546,7 @@ function StepRequirements({ values, set }: StepProps) {
           items={values.qualifications}
           onChange={(items) => set('qualifications', items)}
           placeholder="e.g. SAMTRAC certificate"
+          suggestions={QUALIFICATION_SUGGESTIONS}
         />
       </div>
       <div className="sm:col-span-2">
@@ -549,6 +555,7 @@ function StepRequirements({ values, set }: StepProps) {
           items={values.languages}
           onChange={(items) => set('languages', items)}
           placeholder="e.g. English (fluent)"
+          suggestions={SA_LANGUAGES}
         />
       </div>
     </div>
