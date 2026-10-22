@@ -25,6 +25,11 @@ jobs:
       - name: Lint
         run: npx eslint . --ext .js,.jsx,.ts,.tsx
 
+      # Unit tests (labels, CSV export, filters, admin API validation + auth guard). The database
+      # integration suite in tests/adminEnquiries.integration.test.ts is opt-in and skips here.
+      - name: Test
+        run: npm test
+
       - name: Build
         run: npx vite build
 
@@ -60,9 +65,9 @@ jobs:
       # Per docs/SECURITY_ARCHITECTURE.md Finding 1.1 (the CTO's explicit condition for shipping
       # the admin inbox): every /api/admin/* data endpoint must call the session-auth guard before
       # doing anything else. login.ts and logout.ts are the auth boundary itself and are exempt —
-      # every other file under api/admin/, AT ANY NESTING DEPTH (find, not a flat glob — the write
-      # endpoints added for status/notes live under api/admin/enquiries/[id]/, which a flat
-      # api/admin/*.ts glob would silently skip), must reference rejectIfUnauthorized, or this fails.
+      # every other file under api/admin/, AT ANY NESTING DEPTH (find, not a flat glob — nested
+      # endpoints such as api/admin/applications/[id].ts would be silently skipped by a flat
+      # api/admin/*.ts glob), must reference rejectIfUnauthorized, or this fails.
       - name: Verify every admin API endpoint enforces the session auth guard
         run: |
           set -e

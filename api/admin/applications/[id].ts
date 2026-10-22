@@ -3,7 +3,7 @@ import { createClient } from '@supabase/supabase-js';
 import { rejectIfUnauthorized } from '../../_lib/adminSession.js';
 import { notifyByEmail } from '../../_lib/notifyEmail.js';
 
-// Status update for a single job application — mirrors api/admin/enquiries/[id].ts, plus an
+// Status update for a single job application — mirrors the status update in api/admin/enquiries.ts, plus an
 // applicant-facing email on the three decision statuses (Offered/Rejected/Hired). Those are the
 // only transitions worth emailing: the applicant already knows they applied, and every earlier
 // stage (Reviewed/Shortlisted/Interviewing) is internal workflow, not something to notify on.
