@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { Seo } from '../../components/Seo';
 import { JobPostingWizard, EMPTY_WIZARD_VALUES, type WizardValues } from '../../components/admin/JobPostingWizard';
+import { SuggestionChips } from '../../components/SuggestionChips';
+import { APPLICATION_NOTE_TEMPLATES } from '../../data/formSuggestions';
 import { POSTING_STATUSES, POSTING_STATUS_LABELS, type AdminJobPosting, type PostingStatus } from '../../types/careers';
 
 interface Note {
@@ -656,6 +658,14 @@ function ApplicationNotesPanel({ applicationId, onUnauthorized }: { applicationI
           className="shrink-0 rounded-sm bg-ink-900 px-3 py-2 text-[0.75rem] font-semibold text-white transition-colors duration-200 hover:bg-ink-700 disabled:cursor-not-allowed disabled:opacity-50">
           {saving ? 'Saving…' : 'Add'}
         </button>
+      </div>
+      <div className="mt-2">
+        <SuggestionChips
+          label="Quick note templates"
+          options={APPLICATION_NOTE_TEMPLATES}
+          onSelect={(v) => setDraft((prev) => (prev.trim() ? `${prev.trimEnd()} ${v}` : v))}
+          disabled={saving}
+        />
       </div>
     </div>
   );

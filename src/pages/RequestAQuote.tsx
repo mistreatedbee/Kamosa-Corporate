@@ -15,11 +15,13 @@ import { PageHeader } from '../components/PageHeader';
 import { Container } from '../components/Container';
 import { Button } from '../components/Button';
 import { SuggestionList } from '../components/SuggestionList';
+import { SuggestionChips } from '../components/SuggestionChips';
 import { company } from '../data/company';
 import {
   COMPLIANCE_STATUSES,
   ORGANISATION_TYPES,
   PROCUREMENT_CATEGORIES,
+  PROJECT_DESCRIPTION_PROMPTS,
   PROJECT_DURATIONS,
   SAFETY_DOCUMENTS,
   SA_LOCATIONS,
@@ -326,6 +328,16 @@ export function RequestAQuote() {
                           placeholder="e.g. We're opening a new site and need guidance on compliance requirements before we start operations."
                           className={`resize-y ${inputClass(Boolean(errors.freeText))}`}
                           {...register('freeText', { required: 'Please tell us what you are looking to achieve.' })} />
+                        <div className="mt-2">
+                          <SuggestionChips
+                            label="Example descriptions"
+                            options={PROJECT_DESCRIPTION_PROMPTS}
+                            onSelect={(v) => {
+                              const current = (watch('freeText') ?? '').trim();
+                              setValue('freeText', current ? `${current} ${v}` : v, { shouldValidate: true });
+                            }}
+                          />
+                        </div>
                       </Field>
                     ) : null}
                   </div>

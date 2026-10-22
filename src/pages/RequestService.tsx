@@ -4,8 +4,10 @@ import { Seo } from '../components/Seo';
 import { PageHeader } from '../components/PageHeader';
 import { Container } from '../components/Container';
 import { Button } from '../components/Button';
+import { SuggestionChips } from '../components/SuggestionChips';
 import { serviceSlugOptions } from '../data/services';
 import { company } from '../data/company';
+import { PROJECT_DESCRIPTION_PROMPTS } from '../data/formSuggestions';
 import { useFormSubmission } from '../hooks/useFormSubmission';
 import {
   submitServiceRequest,
@@ -26,7 +28,7 @@ export function RequestService() {
   const [honeypot, setHoneypot] = useState('');
   const [formRenderedAt] = useState(() => Date.now());
 
-  const { values, errors, submitting, result, update, handleSubmit, describedBy, statusRef } = useFormSubmission({
+  const { values, errors, submitting, result, update, setField, handleSubmit, describedBy, statusRef } = useFormSubmission({
     initial: EMPTY,
     validate: validateServiceRequest,
     submit: (payload) => submitServiceRequest(payload, { website: honeypot, formRenderedAt })
@@ -162,6 +164,13 @@ export function RequestService() {
                     aria-invalid={Boolean(errors.description)}
                     aria-describedby={describedBy('description')}
                     className={`mt-2 resize-y ${fieldClass} ${errors.description ? errorFieldClass : ''}`} />
+                  <div className="mt-2">
+                    <SuggestionChips
+                      label="Example descriptions"
+                      options={PROJECT_DESCRIPTION_PROMPTS}
+                      onSelect={(v) => setField('description', values.description.trim() ? `${values.description.trim()} ${v}` : v)}
+                    />
+                  </div>
                   <FieldError id="description-error" message={errors.description} />
                 </div>
               </div>

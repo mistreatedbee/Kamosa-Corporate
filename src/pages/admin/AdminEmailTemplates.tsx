@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2Icon, MailIcon, RotateCcwIcon } from 'lucide-react';
 import { Seo } from '../../components/Seo';
+import { SuggestionChips } from '../../components/SuggestionChips';
 
 interface Template {
   type: string;
@@ -63,6 +64,29 @@ const SAMPLE_LINES: Record<string, Array<{ label: string; value: string }>> = {
 const SAMPLE_VARS: Record<string, Record<string, string>> = {
   job_application: { role: 'Site Safety Officer' },
   application_status_update: { name: 'Naledi Mokoena', role: 'Site Safety Officer', status: 'Offered' }
+};
+
+// Per-type suggestions so a subject/intro click never pulls in wording meant for a different
+// notification — a rejection-sounding line must never show up as a suggestion for the enquiry or
+// offer-adjacent templates.
+const SUBJECT_SUGGESTIONS: Record<string, string[]> = {
+  enquiry: ['New Kamosa Website Enquiry', 'New Enquiry Received', 'Website Enquiry Notification'],
+  quote_request: ['New Quote Request', 'Quote Request Received', 'New Quote Request Notification'],
+  service_request: ['New Service Request', 'Service Request Received'],
+  job_application: ['New Job Application: {{role}}', 'New Application Received: {{role}}'],
+  application_status_update: ['Update on your application for {{role}}', 'Your application for {{role}} has been updated']
+};
+
+const INTRO_SUGGESTIONS: Record<string, string[]> = {
+  enquiry: ['A new enquiry has been submitted through the website.', 'You have a new enquiry to review.'],
+  quote_request: ['A new quote request has been submitted.', 'Please review the details below and prepare a quote.'],
+  service_request: ['A new service request has been submitted.', 'Please review and action this request.'],
+  job_application: ['A new application has been received for this role.', 'Please review the applicant’s details below.'],
+  application_status_update: [
+    'Thank you for your interest in this role.',
+    'We appreciate the time you took to apply.',
+    'We’re pleased to share an update on your application.'
+  ]
 };
 
 function substitute(text: string, vars: Record<string, string> | undefined): string {
@@ -229,11 +253,16 @@ function TemplateCard({
               value={subject}
               onChange={(event) => setSubject(event.target.value)}
               className="mt-1.5 w-full rounded-md border border-hairline bg-white px-3 py-2 text-[0.875rem] text-ink-900 focus:border-brand-600 focus:outline-none" />
-            {template.type === 'job_application' ? (
+            {template.type === 'job_application' || template.type === 'application_status_update' ? (
               <p className="mt-1.5 text-[0.75rem] text-muted">
                 Type <code className="rounded-sm bg-cream px-1 py-0.5">{'{{role}}'}</code> anywhere you want the job
                 title to appear automatically — see the preview.
               </p>
+            ) : null}
+            {SUBJECT_SUGGESTIONS[template.type] ? (
+              <div className="mt-2">
+                <SuggestionChips label="Suggested subjects" options={SUBJECT_SUGGESTIONS[template.type]} onSelect={setSubject} />
+              </div>
             ) : null}
           </div>
 
@@ -245,6 +274,11 @@ function TemplateCard({
               onChange={(event) => setIntro(event.target.value)}
               placeholder="A short line shown above the details table."
               className="mt-1.5 w-full rounded-md border border-hairline bg-white px-3 py-2 text-[0.875rem] text-ink-900 focus:border-brand-600 focus:outline-none" />
+            {INTRO_SUGGESTIONS[template.type] ? (
+              <div className="mt-2">
+                <SuggestionChips label="Suggested intro lines" options={INTRO_SUGGESTIONS[template.type]} onSelect={setIntro} />
+              </div>
+            ) : null}
           </div>
 
           {error ? <p className="mt-3 text-[0.8125rem] text-error-600">{error}</p> : null}

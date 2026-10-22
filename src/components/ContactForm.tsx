@@ -1,8 +1,10 @@
 import React, { useRef, useState } from 'react';
 import { AlertCircleIcon, CheckCircle2Icon, Loader2Icon, type LucideIcon } from 'lucide-react';
 import { Button } from './Button';
+import { SuggestionChips } from './SuggestionChips';
 import { serviceOptions } from '../data/services';
 import { company } from '../data/company';
+import { CONTACT_MESSAGE_PROMPTS } from '../data/formSuggestions';
 import { submitEnquiry, validateEnquiry, type EnquiryPayload, type EnquiryResult } from '../utils/enquiry';
 
 type Errors = Partial<Record<keyof EnquiryPayload, string>>;
@@ -207,7 +209,13 @@ export function ContactForm({ defaultService }: ContactFormProps = {}) {
             aria-invalid={Boolean(errors.message)}
             aria-describedby={describedBy('message')}
             className={`mt-2 resize-y ${fieldClass} ${errors.message ? errorFieldClass : ''}`} />
-          
+          <div className="mt-2">
+            <SuggestionChips
+              label="Example messages"
+              options={CONTACT_MESSAGE_PROMPTS}
+              onSelect={(v) => setValues((prev) => ({ ...prev, message: prev.message.trim() ? `${prev.message.trim()} ${v}` : v }))}
+            />
+          </div>
           <FieldError id="enquiry-message-error" message={errors.message} />
         </div>
       </div>

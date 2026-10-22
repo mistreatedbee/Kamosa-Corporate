@@ -1,5 +1,6 @@
 import { useId, useState, type KeyboardEvent } from 'react';
 import { PlusIcon, XIcon } from 'lucide-react';
+import { SuggestionChips } from '../SuggestionChips';
 
 interface RepeatableListFieldProps {
   label: string;
@@ -28,6 +29,13 @@ export function RepeatableListField({ label, items, onChange, placeholder, helpT
   const remove = (index: number) => {
     onChange(items.filter((_, i) => i !== index));
   };
+
+  const addValue = (value: string) => {
+    if (!value.trim() || items.includes(value)) return;
+    onChange([...items, value]);
+  };
+
+  const availableSuggestions = (suggestions ?? []).filter((option) => !items.includes(option));
 
   const handleKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === 'Enter') {
@@ -83,6 +91,12 @@ export function RepeatableListField({ label, items, onChange, placeholder, helpT
           Add
         </button>
       </div>
+
+      {availableSuggestions.length > 0 ? (
+        <div className="mt-2">
+          <SuggestionChips label={`Suggested ${label.toLowerCase()}`} options={availableSuggestions} onSelect={addValue} />
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -2,14 +2,19 @@ import { useState } from 'react';
 import { CheckIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { RepeatableListField } from './RepeatableListField';
 import { SuggestionList } from '../SuggestionList';
+import { SuggestionChips } from '../SuggestionChips';
 import { JobPostingPreview } from '../careers/JobPostingPreview';
 import {
+  APPLICATION_INSTRUCTION_SUGGESTIONS,
   CURRENCIES,
   EDUCATION_LEVELS,
   EMPLOYEE_BENEFITS,
   INDUSTRIES,
   JOB_CATEGORIES,
+  JOB_TITLE_SUGGESTIONS,
   QUALIFICATION_SUGGESTIONS,
+  REQUIREMENT_SUGGESTIONS,
+  RESPONSIBILITY_SUGGESTIONS,
   SA_LANGUAGES,
   SA_LOCATIONS,
   WORKING_HOURS_OPTIONS
@@ -323,6 +328,9 @@ function StepBasicInfo({ values, set, errors }: StepProps) {
           onChange={(e) => set('title', e.target.value)}
           placeholder="e.g. Site Safety Officer"
           className={inputClass} />
+        <div className="mt-2">
+          <SuggestionChips label="Suggested job titles" options={JOB_TITLE_SUGGESTIONS} onSelect={(v) => set('title', v)} />
+        </div>
         {errors?.title ? <p className="mt-1 text-[0.75rem] text-error-600">{errors.title}</p> : null}
       </div>
       <div>
@@ -382,6 +390,7 @@ function StepBasicInfo({ values, set, errors }: StepProps) {
           items={values.responsibilities}
           onChange={(items) => set('responsibilities', items)}
           placeholder="Type a responsibility and press Add"
+          suggestions={RESPONSIBILITY_SUGGESTIONS}
         />
       </div>
     </div>
@@ -530,6 +539,7 @@ function StepRequirements({ values, set }: StepProps) {
           items={values.requirements}
           onChange={(items) => set('requirements', items)}
           placeholder="Must-have — e.g. SACPCMP registration"
+          suggestions={REQUIREMENT_SUGGESTIONS}
         />
       </div>
       <div className="sm:col-span-2">
@@ -711,6 +721,13 @@ function StepApplicationSettings({ values, set, errors }: StepProps) {
           onChange={(e) => set('applicationInstructions', e.target.value)}
           placeholder="e.g. Please mention your earliest available start date in your cover letter."
           className={inputClass} />
+        <div className="mt-2">
+          <SuggestionChips
+            label="Suggested instructions"
+            options={APPLICATION_INSTRUCTION_SUGGESTIONS}
+            onSelect={(v) => set('applicationInstructions', values.applicationInstructions.trim() ? `${values.applicationInstructions.trim()} ${v}` : v)}
+          />
+        </div>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

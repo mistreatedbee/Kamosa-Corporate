@@ -124,6 +124,73 @@ export const EMPLOYEE_BENEFITS = [
 
 export const CURRENCIES = ['ZAR', 'USD', 'GBP', 'EUR'];
 
+// Job titles, responsibilities and requirements below draw on Kamosa's own actual service
+// capabilities (src/data/services.ts) rather than generic filler, so suggestions stay grounded in
+// what the company really does.
+export const JOB_TITLE_SUGGESTIONS = [
+  'Health and Safety Officer',
+  'SHEQ Officer',
+  'Training Facilitator',
+  'Environmental Officer',
+  'Procurement Officer',
+  'Business Development Consultant',
+  'Administrative Assistant'
+];
+
+export const RESPONSIBILITY_SUGGESTIONS = [
+  'Develop and maintain construction health and safety files',
+  'Conduct Hazard Identification and Risk Assessments (HIRA)',
+  'Perform legal compliance audits against applicable legislation',
+  'Investigate and report on workplace incidents',
+  'Develop and maintain emergency preparedness and response plans',
+  'Maintain legal appointment registers',
+  'Prepare tender safety documentation',
+  'Communicate effectively with clients and site teams',
+  'Maintain accurate records and documentation'
+];
+
+export const REQUIREMENT_SUGGESTIONS = [
+  'SACPCMP registration',
+  'Valid driver’s license and own transport',
+  'Knowledge of the OHS Act and Construction Regulations',
+  'Strong report-writing and documentation skills',
+  'Relevant industry experience',
+  'Ability to work independently on client sites'
+];
+
+export const APPLICATION_INSTRUCTION_SUGGESTIONS = [
+  'Please submit an up-to-date CV.',
+  'Include copies of relevant qualifications where requested.',
+  'Ensure your contact details are correct before submitting.',
+  'Complete all required screening questions before submitting your application.'
+];
+
+export const APPLICATION_NOTE_TEMPLATES = [
+  'CV reviewed.',
+  'Meets the initial requirements.',
+  'Additional information requested.',
+  'Shortlisted for an interview.',
+  'Interview scheduled.',
+  'Offer prepared.',
+  'Application unsuccessful.',
+  'Candidate withdrew application.'
+];
+
+export const CONTACT_MESSAGE_PROMPTS = [
+  'We need a site safety audit.',
+  'We need help preparing tender safety documentation.',
+  'We need ongoing SHEQ support for our site.',
+  'We’d like a quote for training.',
+  'We need procurement support for PPE or safety equipment.'
+];
+
+export const PROJECT_DESCRIPTION_PROMPTS = [
+  'We’re opening a new site and need guidance on compliance requirements.',
+  'We need a legal compliance audit before an upcoming inspection.',
+  'We need PPE supplied for our team.',
+  'We need training arranged for our staff.'
+];
+
 export const QUALIFICATION_SUGGESTIONS = [
   'SAMTRAC certificate',
   'SACPCMP registration',
